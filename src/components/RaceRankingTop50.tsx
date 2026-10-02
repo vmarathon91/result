@@ -531,11 +531,11 @@ export const RaceRankingTop50: React.FC<RaceRankingTop50Props> = ({
             <button
               type="button"
               onClick={onBackToHome}
-              className="p-1.5 sm:px-3 sm:py-1.5 rounded-full bg-white/15 hover:bg-white/25 text-white font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer border border-white/20"
+              className="p-1.5 sm:px-3 sm:py-1.5 rounded-full bg-white/15 hover:bg-white/25 text-white font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer border border-white/20 whitespace-nowrap shrink-0"
               title="Quay lại danh sách giải đấu"
             >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Chọn giải khác</span>
+              <ArrowLeft className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline whitespace-nowrap">Chọn giải khác</span>
             </button>
 
             <div className="flex items-center gap-2.5">
@@ -562,12 +562,12 @@ export const RaceRankingTop50: React.FC<RaceRankingTop50Props> = ({
             <button
               type="button"
               onClick={() => onNavigateToResult()}
-              className="px-4 py-1.5 rounded-full bg-white hover:bg-emerald-50 text-[#009A44] font-bold text-xs flex items-center gap-1.5 shadow-sm cursor-pointer transition-all active:scale-95"
+              className="px-4 py-1.5 rounded-full bg-white hover:bg-emerald-50 text-[#009A44] font-bold text-xs flex items-center gap-1.5 shadow-sm cursor-pointer transition-all active:scale-95 shrink-0 whitespace-nowrap"
             >
-              <FileCheck className="w-3.5 h-3.5 text-[#009A44]" />
-              <span className="hidden sm:inline">Tra cứu cá nhân</span>
-              <span className="sm:hidden">Tra cứu</span>
-              <ArrowRight className="w-3 h-3 text-[#009A44]" />
+              <FileCheck className="w-3.5 h-3.5 text-[#009A44] shrink-0" />
+              <span className="hidden sm:inline whitespace-nowrap">Tra cứu cá nhân</span>
+              <span className="sm:hidden whitespace-nowrap">Tra cứu</span>
+              <ArrowRight className="w-3 h-3 text-[#009A44] shrink-0" />
             </button>
           </div>
         </div>
@@ -667,7 +667,7 @@ export const RaceRankingTop50: React.FC<RaceRankingTop50Props> = ({
                     </span>
                   </div>
                   <span
-                    className={`text-[9px] sm:text-[10px] font-extrabold tracking-tight mt-0.5 uppercase ${
+                    className={`text-[9px] sm:text-[10px] font-extrabold tracking-tight mt-0.5 uppercase whitespace-nowrap shrink-0 ${
                       isSelected ? info.textActive : 'text-slate-400'
                     }`}
                   >
@@ -694,13 +694,13 @@ export const RaceRankingTop50: React.FC<RaceRankingTop50Props> = ({
               <button
                 type="button"
                 onClick={() => setSelectedAgeGroup('all')}
-                className={`px-3 py-1 rounded-xl text-xs font-semibold transition-all shrink-0 cursor-pointer ${
+                className={`px-3 py-1 rounded-xl text-xs font-semibold transition-all shrink-0 whitespace-nowrap cursor-pointer ${
                   selectedAgeGroup === 'all'
                     ? 'bg-[#009A44] text-white shadow-2xs font-bold'
                     : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
                 }`}
               >
-                Tất cả lứa tuổi
+                <span className="whitespace-nowrap">Tất cả lứa tuổi</span>
               </button>
 
               {availableAgeGroups.map((ag) => (
@@ -708,13 +708,13 @@ export const RaceRankingTop50: React.FC<RaceRankingTop50Props> = ({
                   key={ag}
                   type="button"
                   onClick={() => setSelectedAgeGroup(ag)}
-                  className={`px-3 py-1 rounded-xl text-xs font-semibold transition-all shrink-0 cursor-pointer ${
+                  className={`px-3 py-1 rounded-xl text-xs font-semibold transition-all shrink-0 whitespace-nowrap cursor-pointer ${
                     selectedAgeGroup === ag
                       ? 'bg-[#009A44] text-white shadow-2xs font-bold'
                       : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
                   }`}
                 >
-                  {ag}
+                  <span className="whitespace-nowrap">{ag}</span>
                 </button>
               ))}
             </div>

@@ -647,11 +647,11 @@ export const RaceManagerTab: React.FC<RaceManagerTabProps> = ({
             type="button"
             onClick={handleScanRacesFolder}
             disabled={isScanningFolder}
-            className="px-3 py-2 bg-stone-800 hover:bg-stone-750 border border-stone-700 text-stone-200 font-medium rounded-xl text-xs flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+            className="px-3 py-2 bg-stone-800 hover:bg-stone-750 border border-stone-700 text-stone-200 font-medium rounded-xl text-xs flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50 shrink-0 whitespace-nowrap"
             title="Quét lại thư mục public/races/ để tự động nhận các file .json mới được thêm vào code"
           >
-            <FolderSync className={`w-3.5 h-3.5 text-sky-400 ${isScanningFolder ? 'animate-spin' : ''}`} />
-            <span>{isScanningFolder ? 'Đang quét...' : 'Quét public/races/'}</span>
+            <FolderSync className={`w-3.5 h-3.5 text-sky-400 shrink-0 ${isScanningFolder ? 'animate-spin' : ''}`} />
+            <span className="whitespace-nowrap">{isScanningFolder ? 'Đang quét...' : 'Quét public/races/'}</span>
           </button>
 
           {/* Import JSON button */}
@@ -659,21 +659,21 @@ export const RaceManagerTab: React.FC<RaceManagerTabProps> = ({
             type="button"
             onClick={() => jsonFileInputRef.current?.click()}
             disabled={isImportingJson}
-            className="px-3 py-2 bg-sky-950/70 hover:bg-sky-900/90 border border-sky-700/80 text-sky-300 font-semibold rounded-xl text-xs flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+            className="px-3 py-2 bg-sky-950/70 hover:bg-sky-900/90 border border-sky-700/80 text-sky-300 font-semibold rounded-xl text-xs flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50 shrink-0 whitespace-nowrap"
             title="Nạp cấu hình giải từ file API tĩnh (.json)"
           >
-            <FileCode className="w-3.5 h-3.5 text-sky-400" />
-            <span>{isImportingJson ? 'Đang đọc...' : 'Nhập File API (.json)'}</span>
+            <FileCode className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+            <span className="whitespace-nowrap">{isImportingJson ? 'Đang đọc...' : 'Nhập File API (.json)'}</span>
           </button>
 
           {/* Create race */}
           <button
             type="button"
             onClick={handleOpenCreateModal}
-            className="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl shadow-md flex items-center gap-2 transition-all cursor-pointer hover:scale-[1.02] active:scale-95 text-xs"
+            className="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl shadow-md flex items-center gap-2 transition-all cursor-pointer hover:scale-[1.02] active:scale-95 text-xs shrink-0 whitespace-nowrap"
           >
-            <Plus className="w-4 h-4" />
-            <span>Tạo Giải Mới</span>
+            <Plus className="w-4 h-4 shrink-0" />
+            <span className="whitespace-nowrap">Tạo Giải Mới</span>
           </button>
         </div>
       </div>
@@ -833,22 +833,22 @@ export const RaceManagerTab: React.FC<RaceManagerTabProps> = ({
                     <button
                       type="button"
                       onClick={() => onNavigateToRace(race.slug)}
-                      className="px-2.5 py-1.5 rounded-lg bg-stone-800 hover:bg-stone-750 text-white font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                      className="px-2.5 py-1.5 rounded-lg bg-stone-800 hover:bg-stone-750 text-white font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer shrink-0 whitespace-nowrap"
                       title="Mở trang tra cứu của giải này"
                     >
-                      <ExternalLink className="w-3.5 h-3.5 text-stone-400" />
-                      <span>Vào trang</span>
+                      <ExternalLink className="w-3.5 h-3.5 text-stone-400 shrink-0" />
+                      <span className="whitespace-nowrap">Vào trang</span>
                     </button>
 
                     {/* Placements Studio */}
                     <button
                       type="button"
                       onClick={() => onSelectRaceForPlacements(race)}
-                      className="px-2.5 py-1.5 rounded-lg bg-teal-950/60 hover:bg-teal-900/80 border border-teal-700/80 text-teal-300 font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                      className="px-2.5 py-1.5 rounded-lg bg-teal-950/60 hover:bg-teal-900/80 border border-teal-700/80 text-teal-300 font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer shrink-0 whitespace-nowrap"
                       title="Chỉnh toạ độ và kích thước chữ trên phôi giải này"
                     >
-                      <Sliders className="w-3.5 h-3.5 text-teal-400" />
-                      <span>Chỉnh phôi</span>
+                      <Sliders className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+                      <span className="whitespace-nowrap">Chỉnh phôi</span>
                     </button>
                   </div>
 
@@ -862,11 +862,11 @@ export const RaceManagerTab: React.FC<RaceManagerTabProps> = ({
                           : (race.placements || currentPlacements);
                       exportRaceStaticApi(race, targetPlacements);
                     }}
-                    className="w-full px-3 py-2 rounded-lg bg-sky-950/70 hover:bg-sky-900/90 border border-sky-700/80 text-sky-300 font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-xs"
+                    className="w-full px-3 py-2 rounded-lg bg-sky-950/70 hover:bg-sky-900/90 border border-sky-700/80 text-sky-300 font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-xs shrink-0 whitespace-nowrap"
                     title="Xuất file API tĩnh (.json) chứa thông số và toạ độ phôi mới nhất của giải này"
                   >
                     <FileCode className="w-3.5 h-3.5 text-sky-400 shrink-0" />
-                    <span>Xuất API Tĩnh (.json)</span>
+                    <span className="whitespace-nowrap">Xuất API Tĩnh (.json)</span>
                   </button>
 
                   <div className="flex items-center justify-between gap-2 pt-1 border-t border-stone-800/60">
@@ -874,27 +874,27 @@ export const RaceManagerTab: React.FC<RaceManagerTabProps> = ({
                       public/races/{race.slug}.json
                     </span>
 
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 shrink-0">
                       {/* Clone / Nhân bản */}
                       <button
                         type="button"
                         onClick={() => handleOpenCloneModal(race)}
-                        className="px-2 py-1 rounded-lg bg-teal-950/70 hover:bg-teal-900/90 border border-teal-700/80 text-teal-300 hover:text-white transition-colors cursor-pointer text-[11px] flex items-center gap-1"
+                        className="px-2 py-1 rounded-lg bg-teal-950/70 hover:bg-teal-900/90 border border-teal-700/80 text-teal-300 hover:text-white transition-colors cursor-pointer text-[11px] flex items-center gap-1 shrink-0 whitespace-nowrap"
                         title="Nhân bản (Clone) giải này để tạo giải mới nhanh chóng"
                       >
-                        <Copy className="w-3 h-3 text-teal-400" />
-                        <span>Nhân bản</span>
+                        <Copy className="w-3 h-3 text-teal-400 shrink-0" />
+                        <span className="whitespace-nowrap">Nhân bản</span>
                       </button>
 
                       {/* Edit */}
                       <button
                         type="button"
                         onClick={() => handleOpenEditModal(race)}
-                        className="px-2 py-1 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-white transition-colors cursor-pointer text-[11px] flex items-center gap-1"
+                        className="px-2 py-1 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-white transition-colors cursor-pointer text-[11px] flex items-center gap-1 shrink-0 whitespace-nowrap"
                         title="Chỉnh sửa giải đấu"
                       >
-                        <Edit2 className="w-3 h-3" />
-                        <span>Sửa</span>
+                        <Edit2 className="w-3 h-3 shrink-0" />
+                        <span className="whitespace-nowrap">Sửa</span>
                       </button>
 
                       {/* Delete (if not default) */}
@@ -902,7 +902,7 @@ export const RaceManagerTab: React.FC<RaceManagerTabProps> = ({
                         <button
                           type="button"
                           onClick={() => handleDeleteRace(race)}
-                          className="p-1 rounded-lg bg-red-950/50 hover:bg-red-900/80 text-red-400 hover:text-red-200 transition-colors cursor-pointer"
+                          className="p-1 rounded-lg bg-red-950/50 hover:bg-red-900/80 text-red-400 hover:text-red-200 transition-colors cursor-pointer shrink-0"
                           title="Xoá giải đấu"
                         >
                           <Trash2 className="w-3 h-3" />
@@ -1076,10 +1076,10 @@ export const RaceManagerTab: React.FC<RaceManagerTabProps> = ({
                         <button
                           type="button"
                           onClick={() => bgFileInputRef.current?.click()}
-                          className="px-3 py-1.5 bg-stone-700 hover:bg-stone-600 text-white font-medium rounded-lg text-xs flex items-center gap-1.5 cursor-pointer shadow-xs"
+                          className="px-3 py-1.5 bg-stone-700 hover:bg-stone-600 text-white font-medium rounded-lg text-xs flex items-center gap-1.5 cursor-pointer shadow-xs whitespace-nowrap shrink-0"
                         >
-                          <Upload className="w-3.5 h-3.5" />
-                          <span>Tải ảnh phôi mới (PNG/JPG)</span>
+                          <Upload className="w-3.5 h-3.5 shrink-0" />
+                          <span className="whitespace-nowrap">Tải ảnh phôi mới (PNG/JPG)</span>
                         </button>
 
                         <button
@@ -1088,9 +1088,9 @@ export const RaceManagerTab: React.FC<RaceManagerTabProps> = ({
                             setFormBgUrl('/NA26.png');
                             setFormBgDataUrl(null);
                           }}
-                          className="px-2.5 py-1.5 bg-stone-800 hover:bg-stone-750 text-stone-300 text-[11px] rounded-lg border border-stone-700 cursor-pointer"
+                          className="px-2.5 py-1.5 bg-stone-800 hover:bg-stone-750 text-stone-300 text-[11px] rounded-lg border border-stone-700 cursor-pointer whitespace-nowrap shrink-0"
                         >
-                          Dùng phôi NA26
+                          <span className="whitespace-nowrap">Dùng phôi NA26</span>
                         </button>
                       </div>
 
@@ -1148,14 +1148,14 @@ export const RaceManagerTab: React.FC<RaceManagerTabProps> = ({
                     type="button"
                     onClick={handleTestSupabase}
                     disabled={isTestingSupabase}
-                    className="text-xs text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                    className="text-xs text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1 cursor-pointer disabled:opacity-50 whitespace-nowrap shrink-0"
                   >
                     {isTestingSupabase ? (
-                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin shrink-0" />
                     ) : (
-                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
                     )}
-                    <span>Kiểm tra kết nối Supabase</span>
+                    <span className="whitespace-nowrap">Kiểm tra kết nối Supabase</span>
                   </button>
                 </div>
 
@@ -1294,27 +1294,27 @@ export const RaceManagerTab: React.FC<RaceManagerTabProps> = ({
                   <label className="block text-xs font-bold text-stone-200">
                     5/ Script Ảnh Thi Đấu (Google Sheet: Cột BIB & Cột IMG)
                   </label>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <button
                       type="button"
                       onClick={() => setShowScriptModal(true)}
-                      className="text-xs text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1 cursor-pointer"
+                      className="text-xs text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1 cursor-pointer whitespace-nowrap shrink-0"
                     >
-                      <Code2 className="w-3.5 h-3.5" />
-                      <span>Xem & Copy mã Script</span>
+                      <Code2 className="w-3.5 h-3.5 shrink-0" />
+                      <span className="whitespace-nowrap">Xem & Copy mã Script</span>
                     </button>
                     <button
                       type="button"
                       onClick={handleTestPhotosScript}
                       disabled={isTestingPhotosScript || !formPhotosScriptUrl.trim()}
-                      className="text-xs text-sky-400 hover:text-sky-300 font-semibold flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                      className="text-xs text-sky-400 hover:text-sky-300 font-semibold flex items-center gap-1 cursor-pointer disabled:opacity-50 whitespace-nowrap shrink-0"
                     >
                       {isTestingPhotosScript ? (
-                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin shrink-0" />
                       ) : (
-                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
                       )}
-                      <span>Kiểm tra ảnh</span>
+                      <span className="whitespace-nowrap">Kiểm tra ảnh</span>
                     </button>
                   </div>
                 </div>
@@ -1355,27 +1355,27 @@ export const RaceManagerTab: React.FC<RaceManagerTabProps> = ({
                   <label className="block text-xs font-bold text-stone-200">
                     6/ Script Ghi Log Tải Ảnh HD (Sheet: CHECKING - 4 Cột: TIMESTAMP, BIB, RACE, TIME)
                   </label>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <button
                       type="button"
                       onClick={() => setShowCheckingScriptModal(true)}
-                      className="text-xs text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1 cursor-pointer"
+                      className="text-xs text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1 cursor-pointer whitespace-nowrap shrink-0"
                     >
-                      <Code2 className="w-3.5 h-3.5" />
-                      <span>Xem & Copy mã Script</span>
+                      <Code2 className="w-3.5 h-3.5 shrink-0" />
+                      <span className="whitespace-nowrap">Xem & Copy mã Script</span>
                     </button>
                     <button
                       type="button"
                       onClick={handleTestCheckingScript}
                       disabled={isTestingCheckingScript || !formCheckingScriptUrl.trim()}
-                      className="text-xs text-sky-400 hover:text-sky-300 font-semibold flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                      className="text-xs text-sky-400 hover:text-sky-300 font-semibold flex items-center gap-1 cursor-pointer disabled:opacity-50 whitespace-nowrap shrink-0"
                     >
                       {isTestingCheckingScript ? (
-                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin shrink-0" />
                       ) : (
-                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
                       )}
-                      <span>Kiểm tra ghi log</span>
+                      <span className="whitespace-nowrap">Kiểm tra script</span>
                     </button>
                   </div>
                 </div>
@@ -1447,18 +1447,18 @@ export const RaceManagerTab: React.FC<RaceManagerTabProps> = ({
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 bg-stone-800 hover:bg-stone-750 text-stone-300 rounded-xl text-xs font-semibold cursor-pointer"
+                className="px-4 py-2 bg-stone-800 hover:bg-stone-750 text-stone-300 rounded-xl text-xs font-semibold cursor-pointer shrink-0 whitespace-nowrap"
               >
-                Đóng
+                <span className="whitespace-nowrap">Đóng</span>
               </button>
               <button
                 type="submit"
                 form="race-edit-form"
                 disabled={isSaving}
-                className="px-5 py-2 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl text-xs flex items-center gap-2 shadow-md cursor-pointer disabled:opacity-50"
+                className="px-5 py-2 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl text-xs flex items-center gap-2 shadow-md cursor-pointer disabled:opacity-50 shrink-0 whitespace-nowrap"
               >
-                {isSaving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                <span>{editingRace ? 'Lưu Thay Đổi' : 'Lưu & Khởi Tạo Giải'}</span>
+                {isSaving ? <RefreshCw className="w-4 h-4 animate-spin shrink-0" /> : <Check className="w-4 h-4 shrink-0" />}
+                <span className="whitespace-nowrap">{editingRace ? 'Lưu Thay Đổi' : 'Lưu & Khởi Tạo Giải'}</span>
               </button>
             </div>
           </div>
@@ -1524,10 +1524,10 @@ export const RaceManagerTab: React.FC<RaceManagerTabProps> = ({
                     setCopiedScript(true);
                     setTimeout(() => setCopiedScript(false), 3000);
                   }}
-                  className="px-3 py-1 bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold rounded-lg text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                  className="px-3 py-1 bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold rounded-lg text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer shrink-0 whitespace-nowrap"
                 >
-                  {copiedScript ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{copiedScript ? 'Đã sao chép!' : 'Sao chép toàn bộ code'}</span>
+                  {copiedScript ? <Check className="w-3.5 h-3.5 shrink-0" /> : <Copy className="w-3.5 h-3.5 shrink-0" />}
+                  <span className="whitespace-nowrap">{copiedScript ? 'Đã sao chép!' : 'Sao chép toàn bộ code'}</span>
                 </button>
               </div>
               <pre className="p-4 bg-stone-950 border border-stone-700 rounded-b-xl overflow-x-auto text-[11px] font-mono text-emerald-400 max-h-72 scrollbar-thin">
@@ -1541,9 +1541,9 @@ export const RaceManagerTab: React.FC<RaceManagerTabProps> = ({
               <button
                 type="button"
                 onClick={() => setShowScriptModal(false)}
-                className="px-5 py-2 bg-stone-800 hover:bg-stone-700 text-white font-semibold rounded-xl text-xs cursor-pointer"
+                className="px-5 py-2 bg-stone-800 hover:bg-stone-700 text-white font-semibold rounded-xl text-xs cursor-pointer shrink-0 whitespace-nowrap"
               >
-                Đã hiểu & Đóng
+                <span className="whitespace-nowrap">Đã hiểu & Đóng</span>
               </button>
             </div>
           </div>
@@ -1609,10 +1609,10 @@ export const RaceManagerTab: React.FC<RaceManagerTabProps> = ({
                     setCopiedCheckingScript(true);
                     setTimeout(() => setCopiedCheckingScript(false), 3000);
                   }}
-                  className="px-3 py-1 bg-teal-500 hover:bg-teal-400 text-stone-950 font-bold rounded-lg text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                  className="px-3 py-1 bg-teal-500 hover:bg-teal-400 text-stone-950 font-bold rounded-lg text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer shrink-0 whitespace-nowrap"
                 >
-                  {copiedCheckingScript ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{copiedCheckingScript ? 'Đã sao chép!' : 'Sao chép toàn bộ code'}</span>
+                  {copiedCheckingScript ? <Check className="w-3.5 h-3.5 shrink-0" /> : <Copy className="w-3.5 h-3.5 shrink-0" />}
+                  <span className="whitespace-nowrap">{copiedCheckingScript ? 'Đã sao chép!' : 'Sao chép toàn bộ code'}</span>
                 </button>
               </div>
               <pre className="p-4 bg-stone-950 border border-stone-700 rounded-b-xl overflow-x-auto text-[11px] font-mono text-emerald-400 max-h-72 scrollbar-thin">
@@ -1626,9 +1626,9 @@ export const RaceManagerTab: React.FC<RaceManagerTabProps> = ({
               <button
                 type="button"
                 onClick={() => setShowCheckingScriptModal(false)}
-                className="px-5 py-2 bg-stone-800 hover:bg-stone-700 text-white font-semibold rounded-xl text-xs cursor-pointer"
+                className="px-5 py-2 bg-stone-800 hover:bg-stone-700 text-white font-semibold rounded-xl text-xs cursor-pointer shrink-0 whitespace-nowrap"
               >
-                Đã hiểu & Đóng
+                <span className="whitespace-nowrap">Đã hiểu & Đóng</span>
               </button>
             </div>
           </div>

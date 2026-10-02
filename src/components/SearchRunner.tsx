@@ -204,19 +204,19 @@ export const SearchRunner: React.FC<SearchRunnerProps> = ({
                       );
                     })()}
                     <div>
-                      <div className="font-semibold text-slate-900 text-sm flex items-center gap-1.5">
-                        <span>{item.name}</span>
-                        <span className="text-xs font-neue-plak font-bold text-[#009A44] bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                      <div className="font-semibold text-slate-900 text-sm flex items-center gap-1.5 flex-wrap">
+                        <span className="truncate">{item.name}</span>
+                        <span className="text-xs font-neue-plak font-bold text-[#009A44] bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 shrink-0 whitespace-nowrap">
                           #{item.bib}
                         </span>
-                        {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-[#00A850] inline" />}
+                        {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-[#00A850] inline shrink-0" />}
                       </div>
-                      <div className="text-xs text-slate-500 mt-0.5 flex items-center gap-2">
-                        <span className="font-semibold text-[#009A44]">{item.distance}</span>
-                        <span>•</span>
-                        <span>Chip Time: <strong className="font-neue-plak font-bold text-slate-900">{item.chipTime}</strong></span>
-                        <span>•</span>
-                        <span>Hạng: <strong className="font-neue-plak font-bold text-amber-600">#{item.overallRank}</strong></span>
+                      <div className="text-xs text-slate-500 mt-0.5 flex items-center gap-2 flex-wrap">
+                        <span className="font-semibold text-[#009A44] shrink-0 whitespace-nowrap">{item.distance}</span>
+                        <span className="text-slate-300">•</span>
+                        <span className="shrink-0 whitespace-nowrap">Chip Time: <strong className="font-neue-plak font-bold text-slate-900">{item.chipTime}</strong></span>
+                        <span className="text-slate-300">•</span>
+                        <span className="shrink-0 whitespace-nowrap">Hạng: <strong className="font-neue-plak font-bold text-amber-600">#{item.overallRank}</strong></span>
                       </div>
                     </div>
                   </div>
@@ -262,13 +262,13 @@ export const SearchRunner: React.FC<SearchRunnerProps> = ({
                 type="button"
                 id={`demo-runner-btn-${r.bib}`}
                 onClick={() => handleSelect(r)}
-                className={`px-2.5 py-1 rounded-lg border text-xs font-medium transition-all cursor-pointer ${
+                className={`px-2.5 py-1 rounded-lg border text-xs font-medium transition-all cursor-pointer shrink-0 whitespace-nowrap ${
                   isCurrent
                     ? 'bg-[#009A44] text-white border-[#009A44] shadow-xs font-semibold'
                     : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
                 }`}
               >
-                {r.name} <span className="font-mono text-[11px] opacity-80">({r.bib})</span>
+                <span className="whitespace-nowrap">{r.name}</span> <span className="font-mono text-[11px] opacity-80 whitespace-nowrap">({r.bib})</span>
               </button>
             );
           })}

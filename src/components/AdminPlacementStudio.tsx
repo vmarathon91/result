@@ -463,19 +463,19 @@ export const AdminPlacementStudio: React.FC<AdminPlacementStudioProps> = ({
           <div className="h-4 w-px bg-slate-700 hidden sm:block" />
 
           {/* Tab Switcher: Quản lý giải vs Chỉnh toạ độ */}
-          <div className="flex items-center bg-slate-800 p-1 rounded-xl border border-slate-700">
+          <div className="flex items-center bg-slate-800 p-1 rounded-xl border border-slate-700 shrink-0 whitespace-nowrap">
             <button
               type="button"
               onClick={() => setAdminTab('races')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shrink-0 whitespace-nowrap ${
                 adminTab === 'races'
                   ? 'bg-gradient-to-r from-[#9F224E] to-[#B81B4B] text-white shadow-xs'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              <Trophy className="w-3.5 h-3.5" />
-              <span>1. Quản Lý & Tạo Giải</span>
-              <span className="px-1.5 py-0.2 rounded-full bg-slate-900 text-[10px] font-mono text-amber-300">
+              <Trophy className="w-3.5 h-3.5 shrink-0" />
+              <span className="whitespace-nowrap">1. Quản Lý & Tạo Giải</span>
+              <span className="px-1.5 py-0.2 rounded-full bg-slate-900 text-[10px] font-mono text-amber-300 shrink-0 whitespace-nowrap">
                 {allRaces.length}
               </span>
             </button>
@@ -483,27 +483,27 @@ export const AdminPlacementStudio: React.FC<AdminPlacementStudioProps> = ({
             <button
               type="button"
               onClick={() => setAdminTab('placements')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shrink-0 whitespace-nowrap ${
                 adminTab === 'placements'
                   ? 'bg-gradient-to-r from-[#9F224E] to-[#B81B4B] text-white shadow-xs'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              <Sliders className="w-3.5 h-3.5" />
-              <span>2. Chỉnh Tọa Độ Chữ</span>
+              <Sliders className="w-3.5 h-3.5 shrink-0" />
+              <span className="whitespace-nowrap">2. Chỉnh Tọa Độ Chữ</span>
             </button>
 
             <button
               type="button"
               onClick={() => setAdminTab('benchmark')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shrink-0 whitespace-nowrap ${
                 adminTab === 'benchmark'
                   ? 'bg-gradient-to-r from-amber-600 to-amber-700 text-white shadow-xs'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              <Zap className="w-3.5 h-3.5 text-amber-400" />
-              <span>3. Benchmark Tốc Độ</span>
+              <Zap className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span className="whitespace-nowrap">3. Benchmark Tốc Độ</span>
             </button>
           </div>
         </div>

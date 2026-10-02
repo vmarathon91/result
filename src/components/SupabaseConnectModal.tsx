@@ -407,22 +407,22 @@ export const SupabaseConnectModal: React.FC<SupabaseConnectModalProps> = ({
         </form>
 
         {/* Modal Footer */}
-        <div className="px-5 py-3.5 border-t border-slate-800 flex items-center justify-end gap-2.5 bg-slate-900/90">
+        <div className="px-5 py-3.5 border-t border-slate-800 flex items-center justify-end gap-2.5 bg-slate-900/90 shrink-0">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl text-xs transition-colors cursor-pointer"
+            className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl text-xs transition-colors cursor-pointer shrink-0 whitespace-nowrap"
           >
-            Hủy
+            <span className="whitespace-nowrap">Hủy</span>
           </button>
           <button
             type="button"
             onClick={handleSubmit}
             disabled={isSaving || !url.trim() || !anonKey.trim()}
-            className="px-5 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl text-xs flex items-center gap-2 transition-all shadow-lg shadow-emerald-950/40 cursor-pointer disabled:opacity-50"
+            className="px-5 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl text-xs flex items-center gap-2 transition-all shadow-lg shadow-emerald-950/40 cursor-pointer disabled:opacity-50 shrink-0 whitespace-nowrap"
           >
-            <Check className="w-4 h-4" />
-            <span>{isSaving ? 'Đang lưu & tải dữ liệu...' : 'Lưu & Đồng Bộ Dữ Liệu Ngay'}</span>
+            <Check className="w-4 h-4 shrink-0" />
+            <span className="whitespace-nowrap">{isSaving ? 'Đang lưu & tải dữ liệu...' : 'Lưu & Đồng Bộ Dữ Liệu Ngay'}</span>
           </button>
         </div>
       </div>

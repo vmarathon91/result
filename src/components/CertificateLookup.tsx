@@ -660,27 +660,27 @@ export function CertificateLookup({
               <button
                 type="button"
                 onClick={handleBackClick}
-                className="px-3.5 py-1.5 rounded-full bg-white/15 hover:bg-white/25 text-white font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer border border-white/20"
+                className="px-3.5 py-1.5 rounded-full bg-white/15 hover:bg-white/25 text-white font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer border border-white/20 shrink-0 whitespace-nowrap"
                 title="Quay lại"
               >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span>{onBack ? 'Quay lại' : onNavigateToRanking ? 'Bảng xếp hạng' : 'Chọn giải khác'}</span>
+                <ArrowLeft className="w-3.5 h-3.5 shrink-0" />
+                <span className="whitespace-nowrap">{onBack ? 'Quay lại' : onNavigateToRanking ? 'Bảng xếp hạng' : 'Chọn giải khác'}</span>
               </button>
             ) : (
               <div />
             )}
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               {showRankingButton && onNavigateToRanking && (
                 <button
                   type="button"
                   onClick={onNavigateToRanking}
-                  className="px-3.5 py-1.5 rounded-full bg-white hover:bg-emerald-50 text-[#009A44] font-bold text-xs flex items-center gap-1.5 shadow-sm transition-colors cursor-pointer"
+                  className="px-3.5 py-1.5 rounded-full bg-white hover:bg-emerald-50 text-[#009A44] font-bold text-xs flex items-center gap-1.5 shadow-sm transition-colors cursor-pointer shrink-0 whitespace-nowrap"
                   title="Chuyển sang Bảng xếp hạng Top 50"
                 >
-                  <Trophy className="w-3.5 h-3.5 text-amber-500" />
-                  <span className="hidden sm:inline">Bảng xếp hạng Top 50</span>
-                  <span className="sm:hidden">Xếp hạng</span>
+                  <Trophy className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                  <span className="hidden sm:inline whitespace-nowrap">Bảng xếp hạng Top 50</span>
+                  <span className="sm:hidden whitespace-nowrap">Xếp hạng</span>
                 </button>
               )}
 
@@ -710,9 +710,9 @@ export function CertificateLookup({
               <button
                 type="button"
                 onClick={() => loadRunnersForRace(dataSourceSettings, activeRace, true)}
-                className="px-2.5 py-1 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-lg text-xs font-semibold cursor-pointer transition-colors"
+                className="px-2.5 py-1 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-lg text-xs font-semibold cursor-pointer transition-colors whitespace-nowrap shrink-0"
               >
-                Tải lại ngay
+                <span className="whitespace-nowrap">Tải lại ngay</span>
               </button>
             </div>
           </div>

@@ -56,11 +56,11 @@ export const RaceSelectorHome: React.FC<RaceSelectorHomeProps> = ({
         <button
           type="button"
           onClick={onGoToAdmin}
-          className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-750 text-slate-300 hover:text-white border border-slate-700 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+          className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-750 text-slate-300 hover:text-white border border-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shrink-0 whitespace-nowrap"
           title="Vào khu vực quản trị giải đấu"
         >
-          <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-          <span>Quản trị</span>
+          <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+          <span className="whitespace-nowrap">Quản trị</span>
         </button>
       </header>
 
@@ -165,13 +165,13 @@ export const RaceSelectorHome: React.FC<RaceSelectorHomeProps> = ({
                     </div>
 
                     {/* Action Button */}
-                    <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between">
-                      <span className="text-[11px] font-mono text-slate-400">
+                    <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-3">
+                      <span className="text-[11px] font-mono text-slate-400 truncate max-w-[140px] sm:max-w-[180px] whitespace-nowrap" title={`/${race.slug}`}>
                         /{race.slug}
                       </span>
-                      <div className="px-3.5 py-1.5 bg-gradient-to-r from-[#9F224E] to-[#BD1E51] group-hover:from-[#881337] group-hover:to-[#9F224E] text-white font-bold rounded-xl text-xs flex items-center gap-1.5 shadow-md shadow-rose-950/40 transition-all">
-                        <span>Tra cứu</span>
-                        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                      <div className="px-3.5 py-1.5 bg-gradient-to-r from-[#9F224E] to-[#BD1E51] group-hover:from-[#881337] group-hover:to-[#9F224E] text-white font-bold rounded-xl text-xs flex items-center gap-1.5 shadow-md shadow-rose-950/40 transition-all shrink-0 whitespace-nowrap">
+                        <span className="whitespace-nowrap">Tra cứu</span>
+                        <ArrowRight className="w-3.5 h-3.5 shrink-0 group-hover:translate-x-0.5 transition-transform" />
                       </div>
                     </div>
                   </div>

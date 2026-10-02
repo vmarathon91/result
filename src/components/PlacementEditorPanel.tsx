@@ -107,26 +107,26 @@ export const PlacementEditorPanel: React.FC<PlacementEditorPanelProps> = ({
           <button
             type="button"
             onClick={onToggleGuide}
-            className={`px-2 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1 transition-all cursor-pointer ${
+            className={`px-2 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1 transition-all cursor-pointer shrink-0 whitespace-nowrap ${
               showGuide
                 ? 'bg-cyan-500 text-stone-950 font-bold shadow-xs'
                 : 'bg-white/10 hover:bg-white/20 text-teal-200'
             }`}
             title="Bật/Tắt tâm định vị trên ảnh chứng nhận"
           >
-            <Target className="w-3 h-3" />
-            <span className="hidden xs:inline">Tâm</span>
-            <span className="text-[9px] uppercase">{showGuide ? 'Bật' : 'Tắt'}</span>
+            <Target className="w-3 h-3 shrink-0" />
+            <span className="hidden xs:inline whitespace-nowrap">Tâm</span>
+            <span className="text-[9px] uppercase whitespace-nowrap">{showGuide ? 'Bật' : 'Tắt'}</span>
           </button>
 
           {/* Close Panel */}
           <button
             type="button"
             onClick={onClose}
-            className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-stone-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+            className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-stone-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer shrink-0"
             title="Đóng bảng công cụ"
           >
-            <X className="w-3.5 h-3.5" />
+            <X className="w-3.5 h-3.5 shrink-0" />
           </button>
         </div>
       </div>
@@ -135,7 +135,7 @@ export const PlacementEditorPanel: React.FC<PlacementEditorPanelProps> = ({
       <div className="p-2.5 bg-stone-50 border-b border-stone-200/80">
         <div className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider mb-1.5 flex items-center justify-between">
           <span>Chọn giá trị cần chỉnh:</span>
-          <span className="text-[10px] font-mono text-teal-700 font-bold">8 trường dữ liệu</span>
+          <span className="text-[10px] font-mono text-teal-700 font-bold whitespace-nowrap">8 trường dữ liệu</span>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
           {fields.map((field) => {
@@ -146,7 +146,7 @@ export const PlacementEditorPanel: React.FC<PlacementEditorPanelProps> = ({
                 type="button"
                 id={`tab-field-${field.id}`}
                 onClick={() => onSelectFieldId(field.id)}
-                className={`px-2 py-1.5 rounded-xl text-xs font-semibold text-left transition-all flex items-center justify-between gap-1 cursor-pointer ${
+                className={`px-2 py-1.5 rounded-xl text-xs font-semibold text-left transition-all flex items-center justify-between gap-1 cursor-pointer shrink-0 whitespace-nowrap ${
                   isSelected
                     ? 'bg-teal-700 text-white shadow-xs font-bold ring-2 ring-teal-600/30'
                     : 'bg-white hover:bg-stone-100 text-stone-700 border border-stone-200'
@@ -501,41 +501,41 @@ export const PlacementEditorPanel: React.FC<PlacementEditorPanelProps> = ({
                 onResetPlacements();
               }
             }}
-            className="px-2.5 py-1.5 text-xs text-stone-600 hover:text-red-700 font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+            className="px-2.5 py-1.5 text-xs text-stone-600 hover:text-red-700 font-medium flex items-center gap-1.5 transition-colors cursor-pointer shrink-0 whitespace-nowrap"
           >
-            <RotateCcw className="w-3 h-3" />
-            <span>Khôi phục tất cả</span>
+            <RotateCcw className="w-3 h-3 shrink-0" />
+            <span className="whitespace-nowrap">Khôi phục tất cả</span>
           </button>
 
           {onCopyCode && (
             <button
               type="button"
               onClick={onCopyCode}
-              className="px-2.5 py-1.5 text-xs text-stone-600 hover:text-stone-900 font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="px-2.5 py-1.5 text-xs text-stone-600 hover:text-stone-900 font-medium flex items-center gap-1.5 transition-colors cursor-pointer shrink-0 whitespace-nowrap"
               title="Sao chép code TypeScript vào clipboard"
             >
-              <Copy className="w-3 h-3" />
-              <span>Copy code TS</span>
+              <Copy className="w-3 h-3 shrink-0" />
+              <span className="whitespace-nowrap">Copy code TS</span>
             </button>
           )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0 flex-wrap">
           {onSaveToRace && (
             <button
               type="button"
               id="save-race-placements-btn"
               onClick={onSaveToRace}
               disabled={isSavingToRace}
-              className="px-3.5 py-1.5 bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+              className="px-3.5 py-1.5 bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer shrink-0 whitespace-nowrap"
               title="Lưu các toạ độ này trực tiếp vào giải đấu"
             >
               {isSavingToRace ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />
               ) : (
-                <Save className="w-3.5 h-3.5" />
+                <Save className="w-3.5 h-3.5 shrink-0" />
               )}
-              <span>{isSavingToRace ? 'Đang lưu...' : 'Lưu vào giải'}</span>
+              <span className="whitespace-nowrap">{isSavingToRace ? 'Đang lưu...' : 'Lưu vào giải'}</span>
             </button>
           )}
 
@@ -544,20 +544,20 @@ export const PlacementEditorPanel: React.FC<PlacementEditorPanelProps> = ({
               type="button"
               id="export-static-api-from-panel-btn"
               onClick={onExportStaticApi}
-              className="px-3 py-1.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+              className="px-3 py-1.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer shrink-0 whitespace-nowrap"
               title="Tải file API tĩnh (.json) chứa toạ độ vừa chỉnh"
             >
-              <FileCode className="w-3.5 h-3.5" />
-              <span>Xuất API Tĩnh</span>
+              <FileCode className="w-3.5 h-3.5 shrink-0" />
+              <span className="whitespace-nowrap">Xuất API Tĩnh</span>
             </button>
           )}
 
           <button
             type="button"
             onClick={onClose}
-            className="px-3 py-1.5 bg-stone-700 hover:bg-stone-800 text-white text-xs font-semibold rounded-xl shadow-xs transition-colors cursor-pointer"
+            className="px-3.5 py-1.5 bg-stone-700 hover:bg-stone-800 text-white text-xs font-semibold rounded-xl shadow-xs transition-colors cursor-pointer shrink-0 whitespace-nowrap"
           >
-            Đóng
+            <span className="whitespace-nowrap">Đóng</span>
           </button>
         </div>
       </div>

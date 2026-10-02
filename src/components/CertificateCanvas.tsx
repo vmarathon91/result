@@ -22,6 +22,7 @@ import {
   X,
   Smartphone,
   Target,
+  Camera,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { Runner, CertificateConfig } from '../types';
@@ -417,20 +418,79 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
     reader.readAsDataURL(file);
   };
 
-  // Process personal runner photo file upload
+  // Process personal runner photo file upload with robust mobile support (iOS Safari/Android camera & large images)
   const processPersonalPhotoFile = (file: File) => {
-    if (!file.type.startsWith('image/')) return;
+    if (!file) return;
+    const isImage =
+      !file.type ||
+      file.type.startsWith('image/') ||
+      file.type === 'application/octet-stream' ||
+      /\.(jpe?g|png|webp|heic|heif|bmp|gif|tiff)$/i.test(file.name);
+
+    if (!isImage) {
+      alert('Vui lòng chọn file hình ảnh (JPG, PNG, WEBP, HEIC...)');
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = async (event) => {
       const dataUrl = event.target?.result as string;
-      await savePersonalPhoto(dataUrl);
-      setUserUploadedPhoto(dataUrl);
-      setPersonalPhotoUrl(dataUrl);
-      setViewMode('collage');
-      setPhotoOffsetX(0);
-      setPhotoOffsetY(0);
-      setPhotoZoom(1.0);
+      if (!dataUrl) return;
+
+      // Create an offscreen Image to safely scale down ultra-high resolution mobile photos
+      // (prevents mobile Safari tab crash and IndexedDB quota exceeded)
+      const img = new Image();
+      img.onload = async () => {
+        const MAX_DIM = 2560; // Max dimension for ultra-sharp 300DPI print
+        let width = img.width;
+        let height = img.height;
+        let finalDataUrl = dataUrl;
+
+        if (width > MAX_DIM || height > MAX_DIM) {
+          if (width > height) {
+            height = Math.round((height * MAX_DIM) / width);
+            width = MAX_DIM;
+          } else {
+            width = Math.round((width * MAX_DIM) / height);
+            height = MAX_DIM;
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            finalDataUrl = canvas.toDataURL('image/jpeg', 0.92);
+          }
+        }
+
+        try {
+          await savePersonalPhoto(finalDataUrl);
+        } catch (e) {
+          console.warn('Could not cache personal photo:', e);
+        }
+        setUserUploadedPhoto(finalDataUrl);
+        setPersonalPhotoUrl(finalDataUrl);
+        setViewMode('collage');
+        setPhotoOffsetX(0);
+        setPhotoOffsetY(0);
+        setPhotoZoom(1.0);
+      };
+
+      img.onerror = () => {
+        // Fallback to raw dataUrl if canvas downsampling fails
+        setUserUploadedPhoto(dataUrl);
+        setPersonalPhotoUrl(dataUrl);
+        setViewMode('collage');
+      };
+
+      img.src = dataUrl;
     };
+
+    reader.onerror = () => {
+      alert('Không thể đọc file ảnh từ thiết bị của bạn. Vui lòng thử lại.');
+    };
+
     reader.readAsDataURL(file);
   };
 
@@ -548,7 +608,10 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
           touch.clientY - panStartRef.current.clientY
         );
         if (moved < 12) {
-          personalFileInputRef.current?.click();
+          if (personalFileInputRef.current) {
+            personalFileInputRef.current.value = '';
+            personalFileInputRef.current.click();
+          }
         }
       }
     }
@@ -796,12 +859,24 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
       className="flex flex-col items-center w-full transition-all duration-300 mx-auto"
       id="certificate-canvas-wrapper"
     >
-      {/* Hidden file inputs */}
+      {/* Hidden file inputs with mobile Safari & Android touch compatibility */}
       <input
         type="file"
+        id="personal-photo-file-input"
         ref={personalFileInputRef}
-        accept="image/*"
-        className="hidden"
+        accept="image/*,image/jpeg,image/png,image/webp,image/heic,image/heif"
+        style={{
+          position: 'fixed',
+          top: '-1000px',
+          left: '-1000px',
+          opacity: 0,
+          width: '1px',
+          height: '1px',
+        }}
+        onClick={(e) => {
+          // Reset value on click so selecting the same file triggers onChange
+          (e.target as HTMLInputElement).value = '';
+        }}
         onChange={(e) => {
           const file = e.target.files?.[0];
           if (file) processPersonalPhotoFile(file);
@@ -809,9 +884,20 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
       />
       <input
         type="file"
+        id="cert-bg-file-input"
         ref={certFileInputRef}
-        accept="image/*"
-        className="hidden"
+        accept="image/*,image/jpeg,image/png,image/webp"
+        style={{
+          position: 'fixed',
+          top: '-1000px',
+          left: '-1000px',
+          opacity: 0,
+          width: '1px',
+          height: '1px',
+        }}
+        onClick={(e) => {
+          (e.target as HTMLInputElement).value = '';
+        }}
         onChange={(e) => {
           const file = e.target.files?.[0];
           if (file) processCertBgFile(file);
@@ -821,33 +907,33 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
       {/* Top Mode Segmented Switcher & Action Toolbar */}
       <div className="w-full flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 mb-3 px-1">
         {/* Mode Toggle: Single vs Collage */}
-        <div className="inline-flex p-1 bg-slate-100 border border-slate-200 rounded-xl shadow-xs self-start sm:self-auto">
+        <div className="inline-flex p-1 bg-slate-100 border border-slate-200 rounded-xl shadow-xs self-start sm:self-auto shrink-0 whitespace-nowrap">
           <button
             type="button"
             id="mode-single-btn"
             onClick={() => setViewMode('single')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shrink-0 whitespace-nowrap ${
               viewMode === 'single'
                 ? 'bg-white text-slate-900 shadow-xs border border-slate-200/80 font-bold'
                 : 'text-slate-500 hover:text-slate-900'
             }`}
           >
-            <span>Chứng nhận đơn</span>
-            <span className="text-[10px] text-slate-400 font-normal">(1080×2400)</span>
+            <span className="whitespace-nowrap">Chứng nhận đơn</span>
+            <span className="text-[10px] text-slate-400 font-normal whitespace-nowrap">(1080×2400)</span>
           </button>
           <button
             type="button"
             id="mode-collage-btn"
             onClick={() => setViewMode('collage')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shrink-0 whitespace-nowrap ${
               viewMode === 'collage'
                 ? 'bg-white text-slate-900 shadow-xs border border-slate-200/80 font-bold'
                 : 'text-slate-500 hover:text-slate-900'
             }`}
           >
-            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-            <span>Ghép ảnh cá nhân</span>
-            <span className="text-[10px] px-1.5 py-0.2 rounded bg-rose-50 text-[#9F224E] font-bold border border-rose-200/60">
+            <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+            <span className="whitespace-nowrap">Ghép ảnh cá nhân</span>
+            <span className="text-[10px] px-1.5 py-0.2 rounded bg-rose-50 text-[#9F224E] font-bold border border-rose-200/60 shrink-0 whitespace-nowrap">
               {photoRatio}
             </span>
           </button>
@@ -860,16 +946,16 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
               type="button"
               id="toggle-placement-tool-btn"
               onClick={() => setShowPlacementTool((prev) => !prev)}
-              className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95 ${
+              className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0 whitespace-nowrap ${
                 showPlacementTool
                   ? 'bg-[#0F2847] text-white shadow-sm ring-2 ring-[#0F2847]/30'
                   : 'bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200'
               }`}
               title="Bật/Tắt công cụ chỉnh vị trí và cỡ chữ với preview trực tiếp"
             >
-              <Sliders className={`w-4 h-4 ${showPlacementTool ? 'text-amber-400' : 'text-slate-600'}`} />
-              <span>{showPlacementTool ? 'Đang chỉnh vị trí' : 'Chỉnh vị trí & Size text'}</span>
-              {showPlacementTool && <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse ml-0.5" />}
+              <Sliders className={`w-4 h-4 shrink-0 ${showPlacementTool ? 'text-amber-400' : 'text-slate-600'}`} />
+              <span className="whitespace-nowrap">{showPlacementTool ? 'Đang chỉnh vị trí' : 'Chỉnh vị trí & Size text'}</span>
+              {showPlacementTool && <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse ml-0.5 shrink-0" />}
             </button>
           )}
 
@@ -877,11 +963,11 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
             type="button"
             id="share-cert-btn"
             onClick={handleShare}
-            className="p-2 px-3 rounded-xl bg-white border border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-50 text-xs font-medium flex items-center gap-1.5 transition-colors shadow-xs"
+            className="p-2 px-3 rounded-xl bg-white border border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-50 text-xs font-medium flex items-center gap-1.5 transition-colors shadow-xs shrink-0 whitespace-nowrap cursor-pointer"
             title="Chia sẻ đường dẫn"
           >
-            {copiedLink ? <Check className="w-4 h-4 text-emerald-600" /> : <Share2 className="w-4 h-4 text-slate-500" />}
-            <span className="hidden sm:inline">{copiedLink ? 'Đã sao chép' : 'Chia sẻ'}</span>
+            {copiedLink ? <Check className="w-4 h-4 text-emerald-600 shrink-0" /> : <Share2 className="w-4 h-4 text-slate-500 shrink-0" />}
+            <span className="hidden sm:inline whitespace-nowrap">{copiedLink ? 'Đã sao chép' : 'Chia sẻ'}</span>
           </button>
 
           <button
@@ -889,10 +975,10 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
             id="download-cert-btn"
             onClick={handleDownload}
             disabled={isDownloading}
-            className="px-4.5 py-2.5 bg-gradient-to-r from-[#009A44] via-[#00B140] to-[#009A44] hover:from-[#008239] hover:to-[#009A44] text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-950/20 flex items-center gap-2 transition-all transform active:scale-95 disabled:opacity-50 cursor-pointer"
+            className="px-4.5 py-2.5 bg-gradient-to-r from-[#009A44] via-[#00B140] to-[#009A44] hover:from-[#008239] hover:to-[#009A44] text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-950/20 flex items-center gap-2 transition-all transform active:scale-95 disabled:opacity-50 cursor-pointer shrink-0 whitespace-nowrap"
           >
-            {isDownloading ? <RefreshCw className="w-4 h-4 animate-spin text-white/80" /> : <Download className="w-4 h-4" />}
-            <span>
+            {isDownloading ? <RefreshCw className="w-4 h-4 animate-spin text-white/80 shrink-0" /> : <Download className="w-4 h-4 shrink-0" />}
+            <span className="whitespace-nowrap">
               {isDownloading
                 ? 'Đang xuất ảnh...'
                 : viewMode === 'collage'
@@ -933,12 +1019,17 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
             <button
               type="button"
               id="upload-personal-photo-btn"
-              onClick={() => personalFileInputRef.current?.click()}
-              className="px-3 py-1.5 bg-[#009A44] hover:bg-[#008239] text-white font-semibold rounded-lg flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
+              onClick={() => {
+                if (personalFileInputRef.current) {
+                  personalFileInputRef.current.value = '';
+                  personalFileInputRef.current.click();
+                }
+              }}
+              className="px-3.5 py-2 bg-[#009A44] hover:bg-[#008239] text-white font-semibold rounded-lg flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer shrink-0 whitespace-nowrap select-none active:scale-95"
               title="Tải ảnh chạy bộ của bạn lên"
             >
-              <Upload className="w-3.5 h-3.5" />
-              <span>{personalPhotoUrl ? 'Đổi ảnh cá nhân' : 'Chọn ảnh cá nhân'}</span>
+              <Upload className="w-3.5 h-3.5 shrink-0" />
+              <span className="whitespace-nowrap">{personalPhotoUrl ? 'Đổi ảnh cá nhân' : 'Chọn ảnh cá nhân'}</span>
             </button>
 
             {personalPhotoUrl ? (
@@ -946,87 +1037,87 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
                 type="button"
                 id="remove-personal-photo-btn"
                 onClick={handleRemovePhoto}
-                className="px-2.5 py-1.5 bg-white hover:bg-rose-50 hover:text-rose-600 border border-slate-200 text-slate-600 rounded-lg flex items-center gap-1 transition-colors cursor-pointer"
+                className="px-2.5 py-2 bg-white hover:bg-rose-50 hover:text-rose-600 border border-slate-200 text-slate-600 rounded-lg flex items-center gap-1 transition-colors cursor-pointer shrink-0 whitespace-nowrap"
                 title="Xóa ảnh hiện tại"
               >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Xóa ảnh</span>
+                <Trash2 className="w-3.5 h-3.5 shrink-0" />
+                <span className="whitespace-nowrap">Xóa ảnh</span>
               </button>
             ) : (
               <button
                 type="button"
                 id="sample-photo-btn"
                 onClick={handleUseSamplePhoto}
-                className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 rounded-lg flex items-center gap-1 transition-colors cursor-pointer"
+                className="px-2.5 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 rounded-lg flex items-center gap-1 transition-colors cursor-pointer shrink-0 whitespace-nowrap"
                 title="Dùng ảnh vận động viên mẫu để xem trước"
               >
-                <ImageIcon className="w-3.5 h-3.5 text-slate-500" />
-                <span>Dùng ảnh mẫu</span>
+                <ImageIcon className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                <span className="whitespace-nowrap">Dùng ảnh mẫu</span>
               </button>
             )}
 
             {/* Layout switch: Photo on Left vs Photo on Right */}
-            <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+            <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200 shrink-0 whitespace-nowrap">
               <button
                 type="button"
                 id="layout-photo-left-btn"
                 onClick={() => setPhotoSide('left')}
-                className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-colors cursor-pointer ${
+                className={`px-2.5 py-1.5 rounded text-[11px] font-semibold transition-colors cursor-pointer shrink-0 whitespace-nowrap ${
                   photoSide === 'left' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
                 }`}
                 title="Ảnh cá nhân bên Trái, Chứng nhận bên Phải"
               >
-                Ảnh Trái • Certi Phải
+                <span className="whitespace-nowrap">Ảnh Trái • Certi Phải</span>
               </button>
               <button
                 type="button"
                 id="layout-photo-right-btn"
                 onClick={() => setPhotoSide('right')}
-                className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-colors cursor-pointer ${
+                className={`px-2.5 py-1.5 rounded text-[11px] font-semibold transition-colors cursor-pointer shrink-0 whitespace-nowrap ${
                   photoSide === 'right' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
                 }`}
                 title="Chứng nhận bên Trái, Ảnh cá nhân bên Phải"
               >
-                Certi Trái • Ảnh Phải
+                <span className="whitespace-nowrap">Certi Trái • Ảnh Phải</span>
               </button>
             </div>
 
             {/* Frame Ratio Selector: Cân đối (1:1 Bằng Cert) vs Rộng (2:1) vs Gọn (3/5) */}
-            <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200">
-              <span className="text-[10px] text-slate-500 font-semibold px-1 hidden sm:inline">Khung ảnh:</span>
+            <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200 shrink-0 whitespace-nowrap">
+              <span className="text-[10px] text-slate-500 font-semibold px-1 hidden sm:inline whitespace-nowrap">Khung ảnh:</span>
               <button
                 type="button"
                 id="ratio-equal-btn"
                 onClick={() => setPhotoRatio('1:1')}
-                className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-colors cursor-pointer flex items-center gap-1 ${
+                className={`px-2.5 py-1.5 rounded text-[11px] font-semibold transition-colors cursor-pointer flex items-center gap-1 shrink-0 whitespace-nowrap ${
                   photoRatio === '1:1' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
                 }`}
                 title="Khung ảnh cá nhân ngang bằng với khung Certificate (Tỉ lệ 1:1 - Cân đối, Tổng 2160×2400)"
               >
-                <span>Bằng Cert (1:1)</span>
-                <span className="text-[9px] px-1 py-0.2 rounded bg-amber-50 text-amber-800 font-bold border border-amber-200">Cân đối</span>
+                <span className="whitespace-nowrap">Bằng Cert (1:1)</span>
+                <span className="text-[9px] px-1 py-0.2 rounded bg-amber-50 text-amber-800 font-bold border border-amber-200 whitespace-nowrap">Cân đối</span>
               </button>
               <button
                 type="button"
                 id="ratio-wide-btn"
                 onClick={() => setPhotoRatio('2:1')}
-                className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-colors cursor-pointer ${
+                className={`px-2.5 py-1.5 rounded text-[11px] font-semibold transition-colors cursor-pointer shrink-0 whitespace-nowrap ${
                   photoRatio === '2:1' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
                 }`}
                 title="Khung ảnh cá nhân rộng gấp đôi chứng nhận (Tỉ lệ 2:1 Toàn cảnh - Tổng 3240×2400)"
               >
-                Rộng (2:1)
+                <span className="whitespace-nowrap">Rộng (2:1)</span>
               </button>
               <button
                 type="button"
                 id="ratio-compact-btn"
                 onClick={() => setPhotoRatio('3:5')}
-                className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-colors cursor-pointer ${
+                className={`px-2.5 py-1.5 rounded text-[11px] font-semibold transition-colors cursor-pointer shrink-0 whitespace-nowrap ${
                   photoRatio === '3:5' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-900'
                 }`}
                 title="Khung ảnh cá nhân bằng 3/5 chiều ngang chứng nhận (Thu gọn - Tổng 1728×2400)"
               >
-                Gọn (3/5)
+                <span className="whitespace-nowrap">Gọn (3/5)</span>
               </button>
             </div>
           </div>
@@ -1069,17 +1160,17 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
               type="button"
               id="toggle-photo-filters-btn"
               onClick={() => setShowFilterPanel((prev) => !prev)}
-              className={`px-2.5 py-1.5 rounded-lg border text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-2.5 py-1.5 rounded-lg border text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shrink-0 whitespace-nowrap ${
                 showFilterPanel || isFilterActive
                   ? 'bg-stone-900 border-stone-900 text-white shadow-xs'
                   : 'bg-white hover:bg-stone-50 border-stone-200 text-stone-700'
               }`}
               title="Mở bảng chỉnh màu sắc, độ sáng, tương phản"
             >
-              <SlidersHorizontal className="w-3.5 h-3.5" />
-              <span>Chỉnh màu</span>
+              <SlidersHorizontal className="w-3.5 h-3.5 shrink-0" />
+              <span className="whitespace-nowrap">Chỉnh màu</span>
               {isFilterActive && (
-                <span className="w-1.5 h-1.5 rounded-full bg-teal-400"></span>
+                <span className="w-1.5 h-1.5 rounded-full bg-teal-400 shrink-0"></span>
               )}
             </button>
           </div>
@@ -1108,50 +1199,50 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
 
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-[11px] text-stone-500">Mẫu:</span>
-              <div className="inline-flex gap-1 p-0.5 bg-stone-100 rounded-lg border border-stone-200 text-[10px]">
+              <div className="inline-flex gap-1 p-0.5 bg-stone-100 rounded-lg border border-stone-200 text-[10px] shrink-0 whitespace-nowrap">
                 <button
                   type="button"
                   onClick={() => applyPreset('original')}
-                  className={`px-2 py-0.5 rounded font-medium transition-colors cursor-pointer ${
+                  className={`px-2 py-0.5 rounded font-medium transition-colors cursor-pointer shrink-0 whitespace-nowrap ${
                     !isFilterActive
                       ? 'bg-white text-stone-900 shadow-xs font-bold'
                       : 'text-stone-600 hover:text-stone-900'
                   }`}
                   title="Ảnh gốc không qua chỉnh sửa"
                 >
-                  Gốc
+                  <span className="whitespace-nowrap">Gốc</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => applyPreset('vivid')}
-                  className="px-2 py-0.5 rounded font-medium text-stone-600 hover:text-stone-900 hover:bg-white transition-colors cursor-pointer"
+                  className="px-2 py-0.5 rounded font-medium text-stone-600 hover:text-stone-900 hover:bg-white transition-colors cursor-pointer shrink-0 whitespace-nowrap"
                   title="Màu tươi tắn, tương phản cao"
                 >
-                  Tươi tắn
+                  <span className="whitespace-nowrap">Tươi tắn</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => applyPreset('warm')}
-                  className="px-2 py-0.5 rounded font-medium text-stone-600 hover:text-stone-900 hover:bg-white transition-colors cursor-pointer"
+                  className="px-2 py-0.5 rounded font-medium text-stone-600 hover:text-stone-900 hover:bg-white transition-colors cursor-pointer shrink-0 whitespace-nowrap"
                   title="Tông nắng ấm"
                 >
-                  Nắng ấm
+                  <span className="whitespace-nowrap">Nắng ấm</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => applyPreset('cool')}
-                  className="px-2 py-0.5 rounded font-medium text-stone-600 hover:text-stone-900 hover:bg-white transition-colors cursor-pointer"
+                  className="px-2 py-0.5 rounded font-medium text-stone-600 hover:text-stone-900 hover:bg-white transition-colors cursor-pointer shrink-0 whitespace-nowrap"
                   title="Tông dịu mát"
                 >
-                  Dịu mát
+                  <span className="whitespace-nowrap">Dịu mát</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => applyPreset('bw')}
-                  className="px-2 py-0.5 rounded font-medium text-stone-600 hover:text-stone-900 hover:bg-white transition-colors cursor-pointer"
+                  className="px-2 py-0.5 rounded font-medium text-stone-600 hover:text-stone-900 hover:bg-white transition-colors cursor-pointer shrink-0 whitespace-nowrap"
                   title="Trắng đen cổ điển"
                 >
-                  Trắng đen
+                  <span className="whitespace-nowrap">Trắng đen</span>
                 </button>
               </div>
 
@@ -1160,11 +1251,11 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
                   type="button"
                   id="reset-filters-btn"
                   onClick={handleResetFilters}
-                  className="px-2 py-1 text-[11px] text-stone-600 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 border border-stone-200 rounded-lg flex items-center gap-1 transition-colors cursor-pointer"
+                  className="px-2 py-1 text-[11px] text-stone-600 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 border border-stone-200 rounded-lg flex items-center gap-1 transition-colors cursor-pointer shrink-0 whitespace-nowrap"
                   title="Đặt lại màu gốc nguyên bản"
                 >
-                  <RotateCcw className="w-3 h-3" />
-                  <span>Đặt lại gốc</span>
+                  <RotateCcw className="w-3 h-3 shrink-0" />
+                  <span className="whitespace-nowrap">Đặt lại gốc</span>
                 </button>
               )}
             </div>
@@ -1390,6 +1481,14 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
             id="certificate-canvas"
             width={viewMode === 'collage' ? (photoRatio === '3:5' ? 2350 : (photoRatio === '1:1' ? 2938 : 4407)) : 1469}
             height={3508}
+            onClick={() => {
+              if (viewMode === 'collage' && !personalPhotoUrl) {
+                if (personalFileInputRef.current) {
+                  personalFileInputRef.current.value = '';
+                  personalFileInputRef.current.click();
+                }
+              }
+            }}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
@@ -1409,6 +1508,71 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
               viewMode === 'collage' ? (isPanning ? 'cursor-grabbing' : 'cursor-grab') : 'cursor-default'
             }`}
           />
+
+          {/* Quick Mobile / Responsive Action Bar for Personal Photo */}
+          <div className="w-full mt-3 flex flex-col sm:flex-row items-center justify-between gap-2.5 px-0.5">
+            {viewMode === 'collage' ? (
+              !personalPhotoUrl ? (
+                <button
+                  type="button"
+                  id="mobile-canvas-add-photo-btn"
+                  onClick={() => {
+                    if (personalFileInputRef.current) {
+                      personalFileInputRef.current.value = '';
+                      personalFileInputRef.current.click();
+                    }
+                  }}
+                  className="w-full py-3 px-4 bg-gradient-to-r from-[#009A44] to-[#00B140] hover:from-[#008239] hover:to-[#009A44] text-white font-bold text-xs sm:text-sm rounded-xl shadow-md shadow-emerald-950/20 flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.98] whitespace-nowrap shrink-0"
+                >
+                  <Camera className="w-4 h-4 shrink-0 text-white" />
+                  <span className="whitespace-nowrap">Chạm vào đây để thêm ảnh cá nhân của bạn</span>
+                </button>
+              ) : (
+                <div className="w-full flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (personalFileInputRef.current) {
+                        personalFileInputRef.current.value = '';
+                        personalFileInputRef.current.click();
+                      }
+                    }}
+                    className="flex-1 py-2.5 px-3 bg-white border border-slate-300 hover:bg-slate-50 text-slate-800 font-bold text-xs rounded-xl shadow-xs flex items-center justify-center gap-2 cursor-pointer transition-all whitespace-nowrap shrink-0"
+                  >
+                    <Upload className="w-3.5 h-3.5 shrink-0 text-[#009A44]" />
+                    <span className="whitespace-nowrap">Đổi ảnh cá nhân khác</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleRemovePhoto}
+                    className="py-2.5 px-3.5 bg-white border border-rose-200 hover:bg-rose-50 text-rose-600 font-bold text-xs rounded-xl shadow-xs flex items-center justify-center gap-1.5 cursor-pointer transition-all whitespace-nowrap shrink-0"
+                    title="Xóa ảnh cá nhân hiện tại"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 shrink-0" />
+                    <span className="whitespace-nowrap">Xóa ảnh</span>
+                  </button>
+                </div>
+              )
+            ) : (
+              <button
+                type="button"
+                id="mobile-canvas-switch-collage-btn"
+                onClick={() => {
+                  setViewMode('collage');
+                  setTimeout(() => {
+                    if (personalFileInputRef.current) {
+                      personalFileInputRef.current.value = '';
+                      personalFileInputRef.current.click();
+                    }
+                  }, 120);
+                }}
+                className="w-full py-2.5 px-4 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-[#009A44] font-bold text-xs rounded-xl shadow-2xs flex items-center justify-center gap-2 cursor-pointer transition-all whitespace-nowrap shrink-0"
+              >
+                <Sparkles className="w-4 h-4 text-[#009A44] shrink-0" />
+                <span className="whitespace-nowrap">Ghép thêm ảnh cá nhân vào chứng nhận</span>
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Live Placement Editor Studio Panel (Inline side panel, NO popup!) */}
@@ -1509,10 +1673,10 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
                       document.body.removeChild(link);
                     }
                   }}
-                  className="flex-1 py-2.5 px-3 bg-[#009A44] hover:bg-[#008239] text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                  className="flex-1 py-2.5 px-3 bg-[#009A44] hover:bg-[#008239] text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer shrink-0 whitespace-nowrap"
                 >
-                  <Share2 className="w-3.5 h-3.5 text-white/90" />
-                  <span>Lưu vào Thư viện ảnh (Share)</span>
+                  <Share2 className="w-3.5 h-3.5 text-white/90 shrink-0" />
+                  <span className="whitespace-nowrap">Lưu vào Thư viện ảnh (Share)</span>
                 </button>
               )}
 
@@ -1527,10 +1691,10 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
                   link.click();
                   document.body.removeChild(link);
                 }}
-                className="py-2.5 px-3 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 font-semibold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                className="py-2.5 px-3 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 font-semibold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer shrink-0 whitespace-nowrap"
               >
-                <Download className="w-3.5 h-3.5 text-slate-500" />
-                <span>Tải file về máy (Tệp / Downloads)</span>
+                <Download className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                <span className="whitespace-nowrap">Tải file về máy</span>
               </button>
             </div>
           </div>

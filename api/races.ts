@@ -22,23 +22,30 @@ export default async function handler(req: any, res: any) {
       }
     }
 
-    // 2. Try scanning public/races directory
-    const racesDir = path.join(process.cwd(), 'public', 'races');
-    if (fs.existsSync(racesDir)) {
-      const files = fs.readdirSync(racesDir).filter((f) => f.endsWith('.json'));
-      const races: any[] = [];
-      for (const file of files) {
-        try {
-          const raw = fs.readFileSync(path.join(racesDir, file), 'utf8');
-          const data = JSON.parse(raw);
-          if (data && (data.id || data.slug)) {
-            races.push(data);
-          }
-        } catch {}
+    // 2. Try scanning src/races and public/races directories
+    const scanDirs = [
+      path.join(process.cwd(), 'src', 'races'),
+      path.join(process.cwd(), 'public', 'races'),
+    ];
+    const races: any[] = [];
+    for (const racesDir of scanDirs) {
+      if (fs.existsSync(racesDir)) {
+        const files = fs.readdirSync(racesDir).filter((f) => f.endsWith('.json'));
+        for (const file of files) {
+          try {
+            const raw = fs.readFileSync(path.join(racesDir, file), 'utf8');
+            const data = JSON.parse(raw);
+            if (data && (data.id || data.slug)) {
+              if (!races.some((r) => r.id === data.id || r.slug === data.slug)) {
+                races.push(data);
+              }
+            }
+          } catch {}
+        }
       }
-      if (races.length > 0) {
-        return res.status(200).json(races);
-      }
+    }
+    if (races.length > 0) {
+      return res.status(200).json(races);
     }
   } catch (err: any) {
     console.error('Error serving /api/races:', err);
