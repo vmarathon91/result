@@ -1,7 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Runner } from '../types';
 import { Race } from '../data/races';
-import { SearchRunner } from './SearchRunner';
 import {
   Trophy,
   ArrowRight,
@@ -423,6 +422,62 @@ function matchesDistance(runnerDist: string, category: DistanceCategory, bib: st
   return false;
 }
 
+/**
+ * Kiểm tra xem VĐV có phải là Pacer hoặc không có thông tin lứa tuổi (No age)
+ * để loại bỏ hoàn toàn khỏi Bảng Xếp Hạng (BXH) theo yêu cầu.
+ */
+export function isPacerOrNoAge(runner: Runner): boolean {
+  if (!runner) return true;
+  const ag = (runner.ag || '').toLowerCase().trim();
+  const name = (runner.name || '').toLowerCase().trim();
+  const bib = String(runner.bib || '').toLowerCase().trim();
+
+  // 1. Kiểm tra Pacer (ở cột AG, Tên, hoặc BIB)
+  if (
+    ag === 'pacer' ||
+    ag.includes('pacer') ||
+    name.includes('pacer') ||
+    bib.includes('pacer') ||
+    name.includes('dẫn tốc') ||
+    name.includes('dan toc')
+  ) {
+    return true;
+  }
+
+  // 2. Kiểm tra No age / Không có nhóm tuổi / Rỗng
+  const normAg = ag.replace(/[^a-z0-9]/g, '');
+  if (
+    !ag ||
+    ag === '-' ||
+    ag === '--' ||
+    ag === 'null' ||
+    ag === 'undefined' ||
+    ag === 'none' ||
+    ag === 'n/a' ||
+    ag === 'na' ||
+    ag === '0' ||
+    ag === 'no age' ||
+    ag === 'noage' ||
+    ag === 'no_age' ||
+    ag.includes('no age') ||
+    normAg === 'noage' ||
+    normAg === 'none' ||
+    normAg === 'na' ||
+    normAg === ''
+  ) {
+    return true;
+  }
+
+  // Bắt buộc phải có chữ số trong nhóm tuổi (ví dụ: 31-39, 40-49, 60+, 01-30)
+  // Nếu chỉ có "M" hoặc "F" hoặc "Nam" hoặc "Nữ" mà không có số tuổi -> coi là không có tuổi (No age)
+  const strippedAge = ag.replace(/^[mf]/i, '').trim();
+  if (!strippedAge || strippedAge === '-' || !/\d/.test(strippedAge)) {
+    return true;
+  }
+
+  return false;
+}
+
 export const RaceRankingTop50: React.FC<RaceRankingTop50Props> = ({
   activeRace,
   allRaces,
@@ -443,23 +498,49 @@ export const RaceRankingTop50: React.FC<RaceRankingTop50Props> = ({
   // Search input inside ranking
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  // Extract all distinct age groups present in runners for this distance
+  // Lọc VĐV theo cự ly và loại bỏ triệt để Pacer & No age khỏi BXH
+  const distanceRunners = useMemo(() => {
+    return runners.filter((r) => {
+      if (isPacerOrNoAge(r)) return false;
+      return matchesDistance(r.distance, selectedDistance, r.bib);
+    });
+  }, [runners, selectedDistance]);
+
+  // Trích xuất danh sách lứa tuổi có mặt trong cự ly này (đã loại bỏ Pacer và No age)
   const availableAgeGroups = useMemo(() => {
     const agSet = new Set<string>();
-    for (const r of runners) {
+    for (const r of distanceRunners) {
+      if (isPacerOrNoAge(r)) continue;
       if (r.ag && r.ag !== '-' && r.ag !== 'null') {
-        // Clean AG, e.g. "M40-49" -> "40-49" or keep as is
+        // Làm sạch AG, e.g. "M40-49" -> "40-49", "F01-30" -> "01-30"
         const cleanAg = r.ag.replace(/^[MF]/i, '').trim();
-        if (cleanAg) agSet.add(cleanAg);
+        const lower = cleanAg.toLowerCase();
+        if (
+          cleanAg &&
+          lower !== 'pacer' &&
+          !lower.includes('pacer') &&
+          lower !== 'no age' &&
+          lower !== 'noage' &&
+          !lower.includes('no age')
+        ) {
+          agSet.add(cleanAg);
+        }
       }
     }
-    return Array.from(agSet).sort();
-  }, [runners]);
+    // Sắp xếp thứ tự lứa tuổi tự nhiên: 01-30, 31-39, 40-49, 50-59, 60+
+    return Array.from(agSet).sort((a, b) => {
+      const numA = parseInt(a.split('-')[0], 10) || 0;
+      const numB = parseInt(b.split('-')[0], 10) || 0;
+      return numA - numB;
+    });
+  }, [distanceRunners]);
 
-  // Filter runners by distance
-  const distanceRunners = useMemo(() => {
-    return runners.filter((r) => matchesDistance(r.distance, selectedDistance, r.bib));
-  }, [runners, selectedDistance]);
+  // Nếu lứa tuổi đang chọn không tồn tại trong cự ly hiện tại, tự động chuyển về 'all'
+  useEffect(() => {
+    if (selectedAgeGroup !== 'all' && !availableAgeGroups.includes(selectedAgeGroup)) {
+      setSelectedAgeGroup('all');
+    }
+  }, [availableAgeGroups, selectedAgeGroup]);
 
   // Split and rank Male (Nam) and Female (Nữ) Top 50
   const { topMale, topFemale } = useMemo(() => {
@@ -538,16 +619,24 @@ export const RaceRankingTop50: React.FC<RaceRankingTop50Props> = ({
               <span className="hidden sm:inline whitespace-nowrap">Chọn giải khác</span>
             </button>
 
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center font-black text-[#009A44] shadow-xs shrink-0 text-xs tracking-tighter">
-                VPIM
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs sm:text-sm font-extrabold uppercase tracking-wide text-white line-clamp-1">
-                  VPBank Hanoi International Marathon
+            <div className="flex items-center gap-2.5 min-w-0">
+              {activeRace.defaultLogoUrl ? (
+                <img
+                  src={activeRace.defaultLogoUrl}
+                  alt={activeRace.name}
+                  className="w-8 h-8 rounded-lg object-contain bg-white p-0.5 shadow-xs shrink-0"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center font-black text-[#009A44] shadow-xs shrink-0 text-xs tracking-tighter uppercase font-mono">
+                  {activeRace.code ? activeRace.code.slice(0, 4) : 'VM'}
+                </div>
+              )}
+              <div className="flex flex-col min-w-0">
+                <span className="text-xs sm:text-sm font-extrabold uppercase tracking-wide text-white truncate">
+                  {activeRace.name}
                 </span>
-                <span className="text-[10px] text-white/80 font-medium hidden sm:inline">
-                  Hanoi 2026 • Cổng tra cứu kết quả & Chứng nhận điện tử
+                <span className="text-[10px] text-white/80 font-medium hidden sm:inline truncate">
+                  {activeRace.locationFull || activeRace.city || 'Việt Nam'}{activeRace.date ? ` • ${activeRace.date}` : ''} • Cổng tra cứu kết quả & Chứng nhận điện tử
                 </span>
               </div>
             </div>
@@ -555,9 +644,11 @@ export const RaceRankingTop50: React.FC<RaceRankingTop50Props> = ({
 
           {/* Navigation Action: View Certificate / Search Result Page */}
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-1 rounded-full bg-white/20 text-white border border-white/30 text-[11px] font-mono font-bold shrink-0">
-              {activeRace.code || 'VPIM26'}
-            </span>
+            {activeRace.code && (
+              <span className="px-2.5 py-1 rounded-full bg-white/20 text-white border border-white/30 text-[11px] font-mono font-bold shrink-0">
+                {activeRace.code}
+              </span>
+            )}
 
             <button
               type="button"
@@ -573,56 +664,16 @@ export const RaceRankingTop50: React.FC<RaceRankingTop50Props> = ({
         </div>
       </header>
 
-      {/* VPBank Marathon Intro Ribbon (as in Image 1) */}
-      <div className="w-full bg-gradient-to-r from-[#009A44] via-[#00A850] to-[#009A44] text-white py-2.5 px-4 shadow-inner text-center border-t border-white/15">
-        <p className="max-w-4xl mx-auto text-xs sm:text-sm leading-relaxed text-white font-medium">
-          <strong>VPBank Hanoi International Marathon</strong> là sự kiện thể thao quốc tế thường niên chính thức của Thủ đô diễn ra vào ngày <strong>18/10/2026</strong> với bốn cự ly: <strong>42km – 21km – 10km – 5km</strong>.
-        </p>
-      </div>
-
       {/* Main Ranking Content Area */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-3 sm:px-6 py-6 sm:py-8 space-y-8">
+      <main className="flex-1 max-w-6xl w-full mx-auto px-3 sm:px-6 py-6 sm:py-8 space-y-6">
         {/* ========================================================= */}
-        {/* 1. BOX TRA CỨU KẾT QUẢ & CHỨNG NHẬN                       */}
-        {/* ========================================================= */}
-        <section
-          className="w-full bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-7 shadow-xs space-y-4"
-          id="race-lookup-box"
-        >
-          {/* Title & Lead đồng nhất style với Bảng xếp hạng */}
-          <div className="text-center space-y-1">
-            <h2 className="text-xl sm:text-2xl font-black text-slate-900 uppercase tracking-wide">
-              TRA CỨU KẾT QUẢ & CHỨNG NHẬN
-            </h2>
-            <p className="text-xs text-slate-500">
-              {activeRace.name} • Nhập số BIB hoặc Họ tên vận động viên để tra cứu thành tích và tải chứng nhận điện tử
-            </p>
-          </div>
-
-          <div className="max-w-2xl mx-auto w-full">
-            <SearchRunner
-              runners={runners}
-              selectedRunner={null}
-              isLoading={isLoadingRunners}
-              demoRunners={activeRace.demoRunners}
-              demoPhotos={activeRace.demoPhotos}
-              showDemoChips={false}
-              onSelectRunner={(runner) => {
-                onSelectRunner(runner);
-                onNavigateToResult(runner.bib, runner);
-              }}
-            />
-          </div>
-        </section>
-
-        {/* ========================================================= */}
-        {/* 2. BOX BẢNG XẾP HẠNG TOP 50                               */}
+        {/* BẢNG XẾP HẠNG TOP 50                                      */}
         {/* ========================================================= */}
         <section
           className="w-full bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-7 shadow-xs space-y-6"
           id="race-ranking-box"
         >
-          {/* Title & Lead đồng nhất style với Box Tra cứu */}
+          {/* Title & Lead */}
           <div className="text-center space-y-1">
             <h2 className="text-xl sm:text-2xl font-black text-slate-900 uppercase tracking-wide">
               BẢNG XẾP HẠNG TOP 50
@@ -642,7 +693,10 @@ export const RaceRankingTop50: React.FC<RaceRankingTop50Props> = ({
                 <button
                   key={dist}
                   type="button"
-                  onClick={() => setSelectedDistance(dist)}
+                  onClick={() => {
+                    setSelectedDistance(dist);
+                    setSelectedAgeGroup('all');
+                  }}
                   className={`relative px-4 py-2.5 sm:px-6 sm:py-3.5 rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer shadow-xs min-w-[85px] sm:min-w-[125px] ${
                     isSelected
                       ? `bg-white border-2 ${info.borderActive} shadow-md ring-4 ${info.ringActive} scale-105`
