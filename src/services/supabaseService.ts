@@ -5,11 +5,11 @@ import { getRunnerSplitData } from '../utils/runnerSplits';
 const GLOBAL_SUPABASE_STORAGE_KEY = 'vm_supabase_global_config';
 
 export const DEFAULT_SUPABASE_CONFIG: SupabaseConfig = {
-  url: '',
-  anonKey: '',
-  table: 'runners',
+  url: 'https://bwywgifhugulsehkgdjq.supabase.co',
+  anonKey: 'sb_publishable_iH29WLGKQYUhaCMq4Rbqdw_uWtkNg3Q',
+  table: 'result',
   raceColumn: 'Race',
-  raceValue: '',
+  raceValue: 'VPIM26',
 };
 
 /**
@@ -24,19 +24,21 @@ export function getGlobalSupabaseConfig(): SupabaseConfig {
       return {
         ...DEFAULT_SUPABASE_CONFIG,
         ...parsed,
+        // Bảo đảm không bao giờ trỏ vào bảng 'runners' không tồn tại
+        table: parsed.table === 'runners' ? 'result' : (parsed.table || 'result'),
       };
     }
   } catch (err) {
     console.warn('Lỗi đọc cấu hình Supabase từ localStorage:', err);
   }
 
-  // Fallback to Vite env variables if set
+  // Fallback to Vite env variables if set, otherwise use DEFAULT_SUPABASE_CONFIG
   const envUrl = (import.meta as any).env?.VITE_SUPABASE_URL || '';
   const envKey = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || '';
   return {
     ...DEFAULT_SUPABASE_CONFIG,
-    url: envUrl,
-    anonKey: envKey,
+    url: envUrl || DEFAULT_SUPABASE_CONFIG.url,
+    anonKey: envKey || DEFAULT_SUPABASE_CONFIG.anonKey,
   };
 }
 

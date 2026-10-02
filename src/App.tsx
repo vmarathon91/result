@@ -113,7 +113,11 @@ export default function App() {
             supabase: {
               url: targetRace.supabaseUrl || settings.supabase?.url || globalSb.url || '',
               anonKey: targetRace.supabaseAnonKey || settings.supabase?.anonKey || globalSb.anonKey || '',
-              table: targetRace.supabaseTable || settings.supabase?.table || globalSb.table || 'runners',
+              table:
+                (targetRace.supabaseTable === 'runners' ? 'result' : targetRace.supabaseTable) ||
+                (settings.supabase?.table === 'runners' ? 'result' : settings.supabase?.table) ||
+                globalSb.table ||
+                'result',
               raceColumn: targetRace.supabaseRaceColumn || settings.supabase?.raceColumn || globalSb.raceColumn || 'Race',
               raceValue: targetRace.supabaseRaceFilter || settings.supabase?.raceValue || globalSb.raceValue || targetRace.code || targetRace.slug || '',
             },

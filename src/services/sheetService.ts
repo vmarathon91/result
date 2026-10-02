@@ -89,14 +89,24 @@ export const getSavedDataSourceSettings = (prefix: string = 'vm_quynhon'): DataS
     const saved = localStorage.getItem(settingsKey);
     if (saved) {
       const parsed: DataSourceSettings = JSON.parse(saved);
+      if (parsed.supabase && parsed.supabase.table === 'runners') {
+        parsed.supabase.table = 'result';
+      }
       return parsed;
     }
   } catch (e) {
     console.error('Error reading datasource settings:', e);
   }
   return {
-    type: 'appsScript',
-    url: MARATHON_PROXY_ENDPOINT,
+    type: 'supabase',
+    url: '',
+    supabase: {
+      url: 'https://bwywgifhugulsehkgdjq.supabase.co',
+      anonKey: 'sb_publishable_iH29WLGKQYUhaCMq4Rbqdw_uWtkNg3Q',
+      table: 'result',
+      raceColumn: 'Race',
+      raceValue: prefix.toLowerCase().includes('vp') ? 'VPIM26' : 'NA26',
+    },
   };
 };
 

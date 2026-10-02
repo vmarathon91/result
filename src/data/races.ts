@@ -101,7 +101,7 @@ function getBundledRaces(): Race[] {
           checkingScriptUrl: data.checkingScriptUrl || '',
           supabaseUrl: data.supabaseUrl || '',
           supabaseAnonKey: data.supabaseAnonKey || '',
-          supabaseTable: data.supabaseTable || 'runners',
+          supabaseTable: data.supabaseTable === 'runners' ? 'result' : (data.supabaseTable || 'result'),
           supabaseRaceFilter: data.supabaseRaceFilter || data.code || '',
           supabaseRaceColumn: data.supabaseRaceColumn || 'Race',
           description: data.description || '',
@@ -115,6 +115,13 @@ function getBundledRaces(): Race[] {
       console.warn('Error reading bundled race file', path, e);
     }
   }
+
+  // Ensure VPBank is always present even if json reading had issues
+  const hasVp = list.some((r) => (r.id + r.slug + r.code).toLowerCase().includes('vp'));
+  if (!hasVp) {
+    list.unshift(VPBANK_DEFAULT_RACE);
+  }
+
   // Sort to make VPBank Hanoi International Marathon the primary active race
   list.sort((a, b) => {
     const aIsVp = (a.id + a.slug + a.code).toLowerCase().includes('vp');
@@ -126,29 +133,42 @@ function getBundledRaces(): Race[] {
   return list;
 }
 
+export const VPBANK_DEFAULT_RACE: Race = {
+  id: 'vpbank-hanoi-international-marathon-2026',
+  slug: 'vpbank-hanoi-international-marathon-2026',
+  code: 'VPIM26',
+  name: 'VPBank Hanoi International Marathon 2026',
+  shortName: 'VPBank Hanoi International Marathon 2026',
+  city: 'Hà Nội',
+  province: 'Hà Nội',
+  locationFull: 'TP. Hà Nội',
+  date: '18/10/2026',
+  officialUrl: 'https://vpbankmarathon.com',
+  defaultLogoUrl: '/race_logo.png',
+  defaultBgUrl: '/backgrounds/vnexpress-marathon-grand-tour-nghe-an-2026.png',
+  accentColor: '#00A850',
+  themeBadgeBg: 'bg-emerald-50 text-emerald-800 border-emerald-200/80',
+  themeDotBg: 'bg-[#00A850]',
+  storageKeyPrefix: 'vm_vpbankhanoiinternationalmarathon2026',
+  appsScriptUrl: '',
+  photosScriptUrl: 'https://script.google.com/macros/s/AKfycbyUr1QYj9Eyp60HaDLhXJINbr8Yozt3TXMRlPHpJ7QWhpkK6D4D_ZGMhW5dUerljLT3/exec',
+  checkingScriptUrl: 'https://script.google.com/macros/s/AKfycbycDYjQwUGhF_OmEm-nledEXPUdxGiTYZFuwpnyGFvYYsDevZlDRx4fvnSHbwdLpfJG/exec',
+  supabaseUrl: 'https://bwywgifhugulsehkgdjq.supabase.co',
+  supabaseAnonKey: 'sb_publishable_iH29WLGKQYUhaCMq4Rbqdw_uWtkNg3Q',
+  supabaseTable: 'result',
+  supabaseRaceFilter: 'VPIM26',
+  supabaseRaceColumn: 'Race',
+  description: 'Tra cứu kết quả & Chứng nhận điện tử VPBank Hanoi International Marathon 2026',
+  initialRunners: INITIAL_RUNNERS,
+  demoRunners: DEMO_RUNNERS,
+  demoPhotos: DEMO_PHOTOS,
+};
+
 const BUNDLED_RACES = getBundledRaces();
 
-export const RACES: Race[] = BUNDLED_RACES;
+export const RACES: Race[] = BUNDLED_RACES.length > 0 ? BUNDLED_RACES : [VPBANK_DEFAULT_RACE];
 
-export const DEFAULT_RACE: Race = BUNDLED_RACES[0] || {
-  id: '',
-  slug: '',
-  code: '',
-  name: 'Chưa có giải đấu',
-  shortName: 'Chưa có giải',
-  city: '',
-  province: '',
-  locationFull: '',
-  date: '',
-  officialUrl: '',
-  defaultLogoUrl: '/race_logo.png',
-  defaultBgUrl: '/NA26.png',
-  accentColor: '#0369a1',
-  themeBadgeBg: 'bg-sky-50 text-sky-700 border-sky-200/80',
-  themeDotBg: 'bg-sky-600',
-  storageKeyPrefix: 'vm_empty',
-  description: 'Vui lòng thêm file cấu hình giải đấu .json vào thư mục public/races/',
-};
+export const DEFAULT_RACE: Race = RACES[0] || VPBANK_DEFAULT_RACE;
 
 // Helper to resolve race from pathname or hash or query
 export const getRaceFromPath = (_path: string): Race => {
