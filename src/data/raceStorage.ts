@@ -29,7 +29,14 @@ export function getLocalRaces(): Race[] {
       if (cached) {
         const parsed = JSON.parse(cached);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.map(ensureRaceRunners);
+          // Luôn merge với RACES để bảo đảm cả 2 giải (VPBank và Nghệ An) luôn hiển thị đầy đủ
+          const list: Race[] = [...parsed];
+          for (const core of RACES) {
+            if (!list.some((r) => r.id === core.id || r.slug === core.slug || r.code === core.code)) {
+              list.push(core);
+            }
+          }
+          return list.map(ensureRaceRunners);
         }
       }
     } catch {}
@@ -56,8 +63,14 @@ export async function fetchAllRaces(): Promise<Race[]> {
     const resp = await fetch('/api/races?t=' + Date.now());
     if (resp.ok) {
       const data: Race[] = await resp.json();
-      if (Array.isArray(data)) {
-        const res = data.map(ensureRaceRunners);
+      if (Array.isArray(data) && data.length > 0) {
+        const list: Race[] = [...data];
+        for (const core of RACES) {
+          if (!list.some((r) => r.id === core.id || r.slug === core.slug || r.code === core.code)) {
+            list.push(core);
+          }
+        }
+        const res = list.map(ensureRaceRunners);
         saveCache(res);
         return res;
       }
@@ -71,8 +84,14 @@ export async function fetchAllRaces(): Promise<Race[]> {
     const staticResp = await fetch('/races-data.json?t=' + Date.now());
     if (staticResp.ok) {
       const staticData: Race[] = await staticResp.json();
-      if (Array.isArray(staticData)) {
-        const res = staticData.map(ensureRaceRunners);
+      if (Array.isArray(staticData) && staticData.length > 0) {
+        const list: Race[] = [...staticData];
+        for (const core of RACES) {
+          if (!list.some((r) => r.id === core.id || r.slug === core.slug || r.code === core.code)) {
+            list.push(core);
+          }
+        }
+        const res = list.map(ensureRaceRunners);
         saveCache(res);
         return res;
       }

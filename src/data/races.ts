@@ -1,5 +1,6 @@
 import { Runner, CertificatePlacements } from '../types';
 import { INITIAL_RUNNERS, DEMO_RUNNERS, DEMO_PHOTOS } from './mockRunners';
+import { CORE_BUILTIN_RACES, VPBANK_HANOI_RACE } from './defaultRaces';
 
 export interface Race {
   id: string;
@@ -71,7 +72,9 @@ export function ensureRaceRunners(race: Race): Race {
 const staticRaceModules = import.meta.glob(['/public/races/*.json', '../../public/races/*.json'], { eager: true });
 
 function getBundledRaces(): Race[] {
-  const list: Race[] = [];
+  // Start with built-in core races so VPBank and Nghe An are 100% guaranteed on any host (Vercel/Static/Cloud)
+  const list: Race[] = [...CORE_BUILTIN_RACES];
+
   for (const path in staticRaceModules) {
     try {
       const mod = staticRaceModules[path] as any;
@@ -79,7 +82,7 @@ function getBundledRaces(): Race[] {
       if (data && (data.id || data.slug)) {
         const raceDate = data.date || '13/09/2026';
         const fallbackList = INITIAL_RUNNERS.map((r) => ({ ...r, date: raceDate }));
-        list.push({
+        const raceItem: Race = {
           id: data.id || data.slug,
           slug: data.slug || data.id,
           code: data.code || 'VM26',
@@ -109,17 +112,20 @@ function getBundledRaces(): Race[] {
           initialRunners: data.initialRunners || fallbackList,
           demoRunners: data.demoRunners || fallbackList,
           demoPhotos: data.demoPhotos || DEMO_PHOTOS,
-        });
+        };
+
+        const existingIndex = list.findIndex(
+          (r) => r.id === raceItem.id || r.slug === raceItem.slug || r.code === raceItem.code
+        );
+        if (existingIndex >= 0) {
+          list[existingIndex] = { ...list[existingIndex], ...raceItem };
+        } else {
+          list.push(raceItem);
+        }
       }
     } catch (e) {
       console.warn('Error reading bundled race file', path, e);
     }
-  }
-
-  // Ensure VPBank is always present even if json reading had issues
-  const hasVp = list.some((r) => (r.id + r.slug + r.code).toLowerCase().includes('vp'));
-  if (!hasVp) {
-    list.unshift(VPBANK_DEFAULT_RACE);
   }
 
   // Sort to make VPBank Hanoi International Marathon the primary active race
@@ -133,36 +139,7 @@ function getBundledRaces(): Race[] {
   return list;
 }
 
-export const VPBANK_DEFAULT_RACE: Race = {
-  id: 'vpbank-hanoi-international-marathon-2026',
-  slug: 'vpbank-hanoi-international-marathon-2026',
-  code: 'VPIM26',
-  name: 'VPBank Hanoi International Marathon 2026',
-  shortName: 'VPBank Hanoi International Marathon 2026',
-  city: 'Hà Nội',
-  province: 'Hà Nội',
-  locationFull: 'TP. Hà Nội',
-  date: '18/10/2026',
-  officialUrl: 'https://vpbankmarathon.com',
-  defaultLogoUrl: '/race_logo.png',
-  defaultBgUrl: '/backgrounds/vnexpress-marathon-grand-tour-nghe-an-2026.png',
-  accentColor: '#00A850',
-  themeBadgeBg: 'bg-emerald-50 text-emerald-800 border-emerald-200/80',
-  themeDotBg: 'bg-[#00A850]',
-  storageKeyPrefix: 'vm_vpbankhanoiinternationalmarathon2026',
-  appsScriptUrl: '',
-  photosScriptUrl: 'https://script.google.com/macros/s/AKfycbyUr1QYj9Eyp60HaDLhXJINbr8Yozt3TXMRlPHpJ7QWhpkK6D4D_ZGMhW5dUerljLT3/exec',
-  checkingScriptUrl: 'https://script.google.com/macros/s/AKfycbycDYjQwUGhF_OmEm-nledEXPUdxGiTYZFuwpnyGFvYYsDevZlDRx4fvnSHbwdLpfJG/exec',
-  supabaseUrl: 'https://bwywgifhugulsehkgdjq.supabase.co',
-  supabaseAnonKey: 'sb_publishable_iH29WLGKQYUhaCMq4Rbqdw_uWtkNg3Q',
-  supabaseTable: 'result',
-  supabaseRaceFilter: 'VPIM26',
-  supabaseRaceColumn: 'Race',
-  description: 'Tra cứu kết quả & Chứng nhận điện tử VPBank Hanoi International Marathon 2026',
-  initialRunners: INITIAL_RUNNERS,
-  demoRunners: DEMO_RUNNERS,
-  demoPhotos: DEMO_PHOTOS,
-};
+export const VPBANK_DEFAULT_RACE: Race = VPBANK_HANOI_RACE;
 
 const BUNDLED_RACES = getBundledRaces();
 
