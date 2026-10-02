@@ -58,6 +58,9 @@ export default function App() {
     return null;
   });
 
+  // Selected runner object for instant activation in result view
+  const [selectedRunner, setSelectedRunner] = useState<Runner | null>(null);
+
   // Runners data
   const [runners, setRunners] = useState<Runner[]>(() => {
     const cached = getCachedRunners(activeRace.storageKeyPrefix);
@@ -202,9 +205,15 @@ export default function App() {
   };
 
   // Navigate to Result (Certificate) of a runner or general search
-  const handleNavigateToResult = (bib?: string, race: Race = activeRace) => {
+  const handleNavigateToResult = (bib?: string, race: Race = activeRace, runner?: Runner) => {
     setActiveRace(race);
     setSelectedBib(bib || null);
+    if (runner) {
+      setSelectedRunner(runner);
+    } else if (bib) {
+      const match = runners.find((r) => r.bib.trim().toLowerCase() === bib.trim().toLowerCase());
+      if (match) setSelectedRunner(match);
+    }
     setCurrentRoute('result');
     if (typeof window !== 'undefined') {
       const search = bib ? `?bib=${encodeURIComponent(bib)}` : '';
@@ -275,8 +284,11 @@ export default function App() {
         allRaces={allRaces}
         runners={runners}
         isLoadingRunners={isLoadingRunners}
-        onSelectRunner={(runner) => handleNavigateToResult(runner.bib, activeRace)}
-        onNavigateToResult={(bib) => handleNavigateToResult(bib, activeRace)}
+        onSelectRunner={(runner) => {
+          setSelectedRunner(runner);
+          handleNavigateToResult(runner.bib, activeRace, runner);
+        }}
+        onNavigateToResult={(bib, runner) => handleNavigateToResult(bib, activeRace, runner)}
         onBackToHome={handleNavigateToHome}
         onSelectRace={(race) => handleNavigateToRanking(race)}
         onRefreshData={() => loadRunners(activeRace, true)}
@@ -289,6 +301,8 @@ export default function App() {
     <CertificateLookup
       raceSlug={activeRace.slug}
       initialBib={selectedBib || undefined}
+      initialRunner={selectedRunner || undefined}
+      initialRunners={runners}
       races={allRaces}
       showBackButton={true}
       onBack={() => handleNavigateToRanking(activeRace)}
@@ -298,6 +312,7 @@ export default function App() {
       enableAdmin={true}
       syncUrl={false}
       onSelectRunner={(runner) => {
+        setSelectedRunner(runner);
         setSelectedBib(runner.bib);
         if (typeof window !== 'undefined') {
           window.history.replaceState(null, '', `/${activeRace.slug}/result?bib=${runner.bib}`);

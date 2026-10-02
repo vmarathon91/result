@@ -148,7 +148,7 @@ export function drawPhotoTelemetryHUD(options: DrawPhotoTelemetryOptions): void 
         : profile === 'equal'
         ? 34
         : 26;
-    ctx.font = `900 ${valFontSize}px 'Neue Plak Bold', 'Neue Plak', 'Montserrat', sans-serif`;
+    ctx.font = `900 ${valFontSize}px 'Montserrat', 'Plus Jakarta Sans', sans-serif`;
     const valOffsetY = profile === 'wide' ? 30 * scale : profile === 'equal' ? 24 : 20;
     ctx.fillText(metric.value, centerX, topMetricsY + valOffsetY);
   });
@@ -355,7 +355,7 @@ export function drawPhotoTelemetryHUD(options: DrawPhotoTelemetryOptions): void 
           : profile === 'equal'
           ? 13
           : 11;
-      ctx.font = `900 ${bubbleFont}px 'Neue Plak Bold', 'Neue Plak', 'Montserrat', sans-serif`;
+      ctx.font = `900 ${bubbleFont}px 'Montserrat', 'Plus Jakarta Sans', sans-serif`;
       ctx.fillText(`${paceVal}${profile === 'narrow' ? '' : '/km'}`, pt.x, bubbleY + bubbleH / 2);
     }
   });
@@ -406,7 +406,7 @@ export function drawPhotoTelemetryHUD(options: DrawPhotoTelemetryOptions): void 
         : profile === 'equal'
         ? 12
         : 10;
-    ctx.font = `800 ${pillFont}px 'Neue Plak Bold', 'Neue Plak', 'Montserrat', sans-serif`;
+    ctx.font = `800 ${pillFont}px 'Montserrat', 'Plus Jakarta Sans', sans-serif`;
 
     const pillLabel =
       profile === 'wide'
@@ -427,7 +427,7 @@ export function drawPhotoTelemetryHUD(options: DrawPhotoTelemetryOptions): void 
         : profile === 'equal'
         ? 21
         : 17;
-    ctx.font = `900 ${timeFont}px 'Neue Plak Bold', 'Neue Plak', 'Montserrat', sans-serif`;
+    ctx.font = `900 ${timeFont}px 'Montserrat', 'Plus Jakarta Sans', sans-serif`;
     ctx.fillText(pt.cp.time, pt.x, timeY);
     ctx.shadowBlur = 0;
 
@@ -436,12 +436,12 @@ export function drawPhotoTelemetryHUD(options: DrawPhotoTelemetryOptions): void 
     if (isStart) {
       ctx.fillStyle = '#94a3b8';
       const paceFont = profile === 'wide' ? Math.round(15 * scale) : profile === 'equal' ? 13 : 11;
-      ctx.font = `700 ${paceFont}px 'Neue Plak Bold', 'Neue Plak', 'Montserrat', sans-serif`;
+      ctx.font = `700 ${paceFont}px 'Montserrat', 'Plus Jakarta Sans', sans-serif`;
       ctx.fillText('Xuất phát', pt.x, paceDescY);
     } else {
       ctx.fillStyle = isFinish ? '#fde047' : '#78ffd8';
       const paceFont = profile === 'wide' ? Math.round(17 * scale) : profile === 'equal' ? 14 : 12;
-      ctx.font = `800 ${paceFont}px 'Neue Plak Bold', 'Neue Plak', 'Montserrat', sans-serif`;
+      ctx.font = `800 ${paceFont}px 'Montserrat', 'Plus Jakarta Sans', sans-serif`;
       ctx.fillText(`Pace: ${pt.cp.pace}`, pt.x, paceDescY);
     }
   });

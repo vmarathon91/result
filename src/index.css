@@ -1,107 +1,28 @@
 @import "tailwindcss";
 
-@font-face {
-  font-family: 'Neue Plak Bold';
-  src: url('/font/NeuePlakBold.woff2') format('woff2'),
-       url('/font/Monotype%20%20-%20Neue%20Plak%20Bold.woff2') format('woff2'),
-       url('/font/Monotype%20%20-%20Neue%20Plak%20Bold-1.woff2') format('woff2');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
+:root {
+  font-family: 'Plus Jakarta Sans', 'Montserrat', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-@font-face {
-  font-family: 'Neue Plak Bold';
-  src: url('/font/NeuePlakBold.woff2') format('woff2'),
-       url('/font/Monotype%20%20-%20Neue%20Plak%20Bold.woff2') format('woff2'),
-       url('/font/Monotype%20%20-%20Neue%20Plak%20Bold-1.woff2') format('woff2');
-  font-weight: bold;
-  font-style: normal;
-  font-display: swap;
+body {
+  font-family: 'Plus Jakarta Sans', 'Montserrat', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-@font-face {
-  font-family: 'Neue Plak Bold';
-  src: url('/font/NeuePlakBold.woff2') format('woff2'),
-       url('/font/Monotype%20%20-%20Neue%20Plak%20Bold.woff2') format('woff2'),
-       url('/font/Monotype%20%20-%20Neue%20Plak%20Bold-1.woff2') format('woff2');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Neue Plak Bold';
-  src: url('/font/NeuePlakBold.woff2') format('woff2'),
-       url('/font/Monotype%20%20-%20Neue%20Plak%20Bold.woff2') format('woff2'),
-       url('/font/Monotype%20%20-%20Neue%20Plak%20Bold-1.woff2') format('woff2');
-  font-weight: 800;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Neue Plak Bold';
-  src: url('/font/NeuePlakBold.woff2') format('woff2'),
-       url('/font/Monotype%20%20-%20Neue%20Plak%20Bold.woff2') format('woff2'),
-       url('/font/Monotype%20%20-%20Neue%20Plak%20Bold-1.woff2') format('woff2');
-  font-weight: 900;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Neue Plak';
-  src: url('/font/NeuePlakBold.woff2') format('woff2'),
-       url('/font/Monotype%20%20-%20Neue%20Plak%20Bold.woff2') format('woff2'),
-       url('/font/Monotype%20%20-%20Neue%20Plak%20Bold-1.woff2') format('woff2');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Neue Plak';
-  src: url('/font/NeuePlakBold.woff2') format('woff2'),
-       url('/font/Monotype%20%20-%20Neue%20Plak%20Bold.woff2') format('woff2'),
-       url('/font/Monotype%20%20-%20Neue%20Plak%20Bold-1.woff2') format('woff2');
-  font-weight: bold;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Neue Plak';
-  src: url('/font/NeuePlakBold.woff2') format('woff2'),
-       url('/font/Monotype%20%20-%20Neue%20Plak%20Bold.woff2') format('woff2'),
-       url('/font/Monotype%20%20-%20Neue%20Plak%20Bold-1.woff2') format('woff2');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Neue Plak';
-  src: url('/font/NeuePlakBold.woff2') format('woff2'),
-       url('/font/Monotype%20%20-%20Neue%20Plak%20Bold.woff2') format('woff2'),
-       url('/font/Monotype%20%20-%20Neue%20Plak%20Bold-1.woff2') format('woff2');
-  font-weight: 800;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Neue Plak';
-  src: url('/font/NeuePlakBold.woff2') format('woff2'),
-       url('/font/Monotype%20%20-%20Neue%20Plak%20Bold.woff2') format('woff2'),
-       url('/font/Monotype%20%20-%20Neue%20Plak%20Bold-1.woff2') format('woff2');
-  font-weight: 900;
-  font-style: normal;
-  font-display: swap;
-}
-
+/* High-impact sports / marathon typography for numbers, chip times, BIBs and ranks */
 .font-neue-plak,
 .font-stat-value {
-  font-family: 'Neue Plak Bold', 'Neue Plak', 'Montserrat', sans-serif !important;
+  font-family: 'Montserrat', 'Plus Jakarta Sans', 'Oswald', system-ui, sans-serif !important;
+  font-feature-settings: 'tnum' on, 'lnum' on;
 }
+
+.font-heading {
+  font-family: 'Plus Jakarta Sans', 'Montserrat', system-ui, sans-serif !important;
+}
+
+.font-oswald {
+  font-family: 'Oswald', 'Montserrat', sans-serif !important;
+}
+
 

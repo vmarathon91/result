@@ -57,13 +57,13 @@ export const RacePhotosSelector: React.FC<RacePhotosSelectorProps> = ({
       {/* Header Bar */}
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-lg bg-[#9F224E]/10 border border-[#9F224E]/20 flex items-center justify-center text-[#9F224E]">
+          <div className="w-6 h-6 rounded-lg bg-[#009A44]/10 border border-[#009A44]/20 flex items-center justify-center text-[#009A44]">
             <Camera className="w-3.5 h-3.5" />
           </div>
           <div>
             <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
               <span>Ảnh thi đấu của bạn (BIB {runner.bib})</span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-50 text-[#9F224E] border border-rose-200/80 font-bold">
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-[#009A44] border border-emerald-200/80 font-bold">
                 {photos.length} ảnh
               </span>
             </h4>
@@ -83,7 +83,7 @@ export const RacePhotosSelector: React.FC<RacePhotosSelectorProps> = ({
               onClick={() => onSelectPhoto(photoUrl)}
               className={`relative group rounded-xl overflow-hidden shrink-0 border-2 transition-all cursor-pointer w-16 h-20 sm:w-20 sm:h-24 ${
                 isSelected
-                  ? 'border-[#9F224E] ring-2 ring-[#9F224E]/30 shadow-md scale-[1.02]'
+                  ? 'border-[#00A850] ring-2 ring-[#00A850]/30 shadow-md scale-[1.02]'
                   : 'border-slate-200 hover:border-slate-300 opacity-80 hover:opacity-100'
               }`}
               title={`Chọn ảnh thi đấu số ${idx + 1}`}
@@ -97,7 +97,7 @@ export const RacePhotosSelector: React.FC<RacePhotosSelectorProps> = ({
 
               {/* Selected Checkmark Badge */}
               {isSelected && (
-                <div className="absolute top-1 right-1 w-4 h-4 rounded-full bg-[#9F224E] text-white flex items-center justify-center shadow-xs">
+                <div className="absolute top-1 right-1 w-4 h-4 rounded-full bg-[#009A44] text-white flex items-center justify-center shadow-xs">
                   <Check className="w-2.5 h-2.5 stroke-[3]" />
                 </div>
               )}

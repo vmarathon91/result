@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Runner } from '../types';
 import { Race } from '../data/races';
-import { getDemoPhoto } from '../data/mockRunners';
+import { SearchRunner } from './SearchRunner';
 import {
   Trophy,
   ArrowRight,
@@ -15,6 +15,8 @@ import {
   Filter,
   Check,
   ChevronDown,
+  Crown,
+  Medal,
 } from 'lucide-react';
 
 interface RaceRankingTop50Props {
@@ -23,13 +25,64 @@ interface RaceRankingTop50Props {
   runners: Runner[];
   isLoadingRunners: boolean;
   onSelectRunner: (runner: Runner) => void;
-  onNavigateToResult: (bib?: string) => void;
+  onNavigateToResult: (bib?: string, runner?: Runner) => void;
   onBackToHome: () => void;
   onSelectRace: (race: Race) => void;
   onRefreshData?: () => void;
 }
 
 type DistanceCategory = '42K' | '21K' | '10K' | '5K';
+
+// VPBank International Marathon Distance Styles & Labels (from official brand identity)
+const VPBANK_DISTANCES: Record<
+  DistanceCategory,
+  {
+    num: string;
+    label: string;
+    color: string;
+    borderActive: string;
+    textActive: string;
+    bgActive: string;
+    ringActive: string;
+  }
+> = {
+  '42K': {
+    num: '42',
+    label: 'FULL MARATHON',
+    color: '#00A3A6', // Cyan from official 42km
+    borderActive: 'border-[#00A3A6]',
+    textActive: 'text-[#00A3A6]',
+    bgActive: 'bg-cyan-50/70',
+    ringActive: 'ring-[#00A3A6]/25',
+  },
+  '21K': {
+    num: '21',
+    label: 'HALF MARATHON',
+    color: '#00A850', // VPBank Green from official 21km
+    borderActive: 'border-[#00A850]',
+    textActive: 'text-[#00A850]',
+    bgActive: 'bg-emerald-50/70',
+    ringActive: 'ring-[#00A850]/25',
+  },
+  '10K': {
+    num: '10',
+    label: '10 KILOMET',
+    color: '#FFA800', // Gold/Amber from official 10km
+    borderActive: 'border-[#FFA800]',
+    textActive: 'text-[#FFA800]',
+    bgActive: 'bg-amber-50/70',
+    ringActive: 'ring-[#FFA800]/25',
+  },
+  '5K': {
+    num: '5',
+    label: '5 KILOMET',
+    color: '#70C800', // Lime Green from official 5km
+    borderActive: 'border-[#70C800]',
+    textActive: 'text-[#70C800]',
+    bgActive: 'bg-lime-50/70',
+    ringActive: 'ring-[#70C800]/25',
+  },
+};
 
 // SVG Laurel Wreath Medal for Top 1, 2, 3 exactly matching image.png
 const LaurelWreathMedal: React.FC<{ rank: 1 | 2 | 3 }> = ({ rank }) => {
@@ -117,6 +170,212 @@ const RankBadge: React.FC<{ rank: number }> = ({ rank }) => {
       title={`Hạng ${rank}`}
     >
       {rank}
+    </div>
+  );
+};
+
+// Podium component for Top 1 - 3 runners matching authentic athletic sports podium stand (No Avatars)
+const Top3Podium: React.FC<{
+  runners: Runner[];
+  onSelectRunner: (runner: Runner) => void;
+  gender: 'M' | 'F';
+}> = ({ runners, onSelectRunner }) => {
+  const runner1 = runners[0];
+  const runner2 = runners[1];
+  const runner3 = runners[2];
+
+  if (!runner1) return null;
+
+  return (
+    <div className="w-full pt-5 pb-4 px-2 sm:px-4 bg-gradient-to-b from-slate-50/80 via-white to-slate-50/60 border-b border-slate-100 flex flex-col items-center select-none">
+      {/* 3-Step Podium Grid */}
+      <div className="w-full max-w-xs sm:max-w-md grid grid-cols-3 gap-1.5 sm:gap-2.5 items-end justify-center">
+        {/* ================= 2ND PLACE (LEFT - SILVER) ================= */}
+        {runner2 ? (
+          <div
+            onClick={() => onSelectRunner(runner2)}
+            className="group flex flex-col items-center cursor-pointer transition-all duration-200 hover:-translate-y-1.5"
+            title={`Hạng 2: ${runner2.name} (BIB: ${runner2.bib}) • Bấm để xem kết quả & chứng nhận`}
+          >
+            {/* Runner Info Above Pedestal */}
+            <div className="flex flex-col items-center text-center space-y-1 mb-2.5 w-full px-1 min-w-0">
+              <div className="scale-90 sm:scale-100 transition-transform group-hover:scale-110">
+                <LaurelWreathMedal rank={2} />
+              </div>
+              <h4 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-[#009A44] transition-colors truncate max-w-full leading-tight">
+                {runner2.name}
+              </h4>
+              <div className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-mono font-medium truncate max-w-full">
+                <span>BIB: {runner2.bib}</span>
+                {runner2.ag && runner2.ag !== '-' && <span>• {runner2.ag}</span>}
+              </div>
+              <div className="text-xs sm:text-sm font-bold text-slate-700 font-neue-plak bg-slate-100/80 px-2 py-0.5 rounded border border-slate-200/60 shadow-2xs">
+                {runner2.chipTime || '--:--:--'}
+              </div>
+            </div>
+
+            {/* Pedestal 2 (Silver Block with 3D Bevel & Bold Number) */}
+            <div className="w-full h-20 sm:h-28 rounded-t-xl sm:rounded-t-2xl bg-gradient-to-b from-[#E2E8F0] via-[#CBD5E1] to-[#94A3B8] group-hover:from-[#EDF2F7] group-hover:via-[#D5DEE9] shadow-xs flex flex-col items-center justify-between p-2 pt-2.5 transition-colors border-t-2 border-x border-white/80 relative overflow-hidden">
+              <div className="flex flex-col items-center">
+                <span className="text-3xl sm:text-4xl font-black font-neue-plak text-slate-700 tracking-tight drop-shadow-2xs leading-none">
+                  2
+                </span>
+                <span className="text-[9px] sm:text-[10px] font-extrabold tracking-wider text-slate-600 uppercase mt-0.5">
+                  HẠNG 2
+                </span>
+              </div>
+              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white/50 backdrop-blur-xs flex items-center justify-center shadow-2xs">
+                <Medal className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-600" />
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div />
+        )}
+
+        {/* ================= 1ST PLACE (CENTER - GOLD / TALLEST) ================= */}
+        {runner1 && (
+          <div
+            onClick={() => onSelectRunner(runner1)}
+            className="group flex flex-col items-center cursor-pointer transition-all duration-200 hover:-translate-y-1.5 z-10"
+            title={`Hạng 1 - Quán quân: ${runner1.name} (BIB: ${runner1.bib}) • Bấm để xem kết quả & chứng nhận`}
+          >
+            {/* Runner Info Above Pedestal */}
+            <div className="flex flex-col items-center text-center space-y-1 mb-2.5 w-full px-1 min-w-0">
+              <div className="relative scale-95 sm:scale-105 transition-transform group-hover:scale-115">
+                <Crown className="w-4 h-4 text-amber-500 fill-amber-400 absolute -top-3 left-1/2 -translate-x-1/2 drop-shadow-xs animate-bounce" />
+                <LaurelWreathMedal rank={1} />
+              </div>
+              <h4 className="text-xs sm:text-sm font-black text-slate-900 group-hover:text-[#009A44] transition-colors truncate max-w-full leading-tight">
+                {runner1.name}
+              </h4>
+              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-mono font-bold truncate max-w-full shadow-2xs">
+                <span>BIB: {runner1.bib}</span>
+                {runner1.ag && runner1.ag !== '-' && <span>• {runner1.ag}</span>}
+              </div>
+              <div className="text-xs sm:text-sm font-black text-amber-800 font-neue-plak bg-amber-50 px-2.5 py-0.5 rounded border border-amber-200/80 shadow-2xs">
+                {runner1.chipTime || '--:--:--'}
+              </div>
+            </div>
+
+            {/* Pedestal 1 (Gold Block with 3D Bevel & Bold Number - Tallest) */}
+            <div className="w-full h-28 sm:h-36 rounded-t-xl sm:rounded-t-2xl bg-gradient-to-b from-[#FCD34D] via-[#F59E0B] to-[#D97706] group-hover:from-[#FDE68A] group-hover:via-[#FBBF24] shadow-md flex flex-col items-center justify-between p-2 pt-3 transition-colors border-t-2 border-x border-amber-200/90 relative overflow-hidden ring-1 ring-amber-400/30">
+              <div className="flex flex-col items-center">
+                <span className="text-4xl sm:text-5xl font-black font-neue-plak text-white tracking-tight drop-shadow-sm leading-none">
+                  1
+                </span>
+                <span className="text-[9px] sm:text-[10px] font-extrabold tracking-widest text-amber-100 uppercase mt-0.5">
+                  QUÁN QUÂN
+                </span>
+              </div>
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/40 backdrop-blur-xs flex items-center justify-center shadow-2xs">
+                <Trophy className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-white drop-shadow-xs" />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ================= 3RD PLACE (RIGHT - BRONZE / ORANGE) ================= */}
+        {runner3 ? (
+          <div
+            onClick={() => onSelectRunner(runner3)}
+            className="group flex flex-col items-center cursor-pointer transition-all duration-200 hover:-translate-y-1.5"
+            title={`Hạng 3: ${runner3.name} (BIB: ${runner3.bib}) • Bấm để xem kết quả & chứng nhận`}
+          >
+            {/* Runner Info Above Pedestal */}
+            <div className="flex flex-col items-center text-center space-y-1 mb-2.5 w-full px-1 min-w-0">
+              <div className="scale-90 sm:scale-100 transition-transform group-hover:scale-110">
+                <LaurelWreathMedal rank={3} />
+              </div>
+              <h4 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-[#009A44] transition-colors truncate max-w-full leading-tight">
+                {runner3.name}
+              </h4>
+              <div className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-900 border border-orange-200 text-[10px] font-mono font-medium truncate max-w-full">
+                <span>BIB: {runner3.bib}</span>
+                {runner3.ag && runner3.ag !== '-' && <span>• {runner3.ag}</span>}
+              </div>
+              <div className="text-xs sm:text-sm font-bold text-orange-700 font-neue-plak bg-orange-50/80 px-2 py-0.5 rounded border border-orange-200/60 shadow-2xs">
+                {runner3.chipTime || '--:--:--'}
+              </div>
+            </div>
+
+            {/* Pedestal 3 (Bronze / Orange Block with 3D Bevel & Bold Number) */}
+            <div className="w-full h-16 sm:h-22 rounded-t-xl sm:rounded-t-2xl bg-gradient-to-b from-[#FDBA74] via-[#FB923C] to-[#EA580C] group-hover:from-[#FED7AA] group-hover:via-[#FDBA74] shadow-xs flex flex-col items-center justify-between p-2 pt-2.5 transition-colors border-t-2 border-x border-orange-200/80 relative overflow-hidden">
+              <div className="flex flex-col items-center">
+                <span className="text-3xl sm:text-4xl font-black font-neue-plak text-white tracking-tight drop-shadow-2xs leading-none">
+                  3
+                </span>
+                <span className="text-[9px] sm:text-[10px] font-extrabold tracking-wider text-orange-100 uppercase mt-0.5">
+                  HẠNG 3
+                </span>
+              </div>
+              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white/40 backdrop-blur-xs flex items-center justify-center shadow-2xs">
+                <Medal className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white drop-shadow-xs" />
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div />
+        )}
+      </div>
+
+      {/* Shared Podium Platform Stage (Bục đế vinh danh kết nối 3 vị trí) */}
+      <div className="w-full max-w-xs sm:max-w-md h-3 sm:h-3.5 bg-gradient-to-r from-slate-700 via-slate-800 to-slate-700 rounded-b-xl shadow-md border-t border-slate-600 flex items-center justify-center relative -mt-0.5">
+        <div className="w-20 sm:w-28 h-0.5 bg-[#00A850] rounded-full opacity-90" />
+      </div>
+
+      {/* Interactive Helper Hint */}
+      <p className="text-[10px] text-slate-400 mt-2 text-center">
+        Nhấn vào vận động viên trên bục để tra cứu chi tiết & chứng nhận
+      </p>
+    </div>
+  );
+};
+
+// Row item for runners ranked 4 to 50
+const RunnerRankRow: React.FC<{
+  runner: Runner;
+  rankNumber: number;
+  onSelectRunner: (runner: Runner) => void;
+}> = ({ runner, rankNumber, onSelectRunner }) => {
+  return (
+    <div
+      onClick={() => onSelectRunner(runner)}
+      className="group px-3 sm:px-4 py-3 hover:bg-emerald-50/50 flex items-center justify-between gap-3 transition-colors cursor-pointer"
+      title={`Hạng ${rankNumber}: ${runner.name} (BIB: ${runner.bib}) - Xem chi tiết & chứng nhận`}
+    >
+      {/* Left side: Rank Badge + Name/BIB */}
+      <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+        <RankBadge rank={rankNumber} />
+
+        {/* Name and BIB */}
+        <div className="min-w-0">
+          <h4 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-[#009A44] transition-colors truncate">
+            {runner.name}
+          </h4>
+          <div className="text-[11px] text-slate-500 flex items-center gap-1.5 mt-0.5">
+            <span className="font-mono">BIB: {runner.bib}</span>
+            {runner.ag && runner.ag !== '-' && (
+              <>
+                <span>•</span>
+                <span className="text-[10px] px-1 py-0.2 bg-slate-100 rounded text-slate-600 font-medium">
+                  {runner.ag}
+                </span>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Right side: Chip time + Arrow */}
+      <div className="flex items-center gap-2 shrink-0">
+        <span className="font-bold text-xs sm:text-sm text-slate-900 font-neue-plak">
+          {runner.chipTime || '--:--:--'}
+        </span>
+        <div className="w-5 h-5 rounded-full flex items-center justify-center text-slate-400 group-hover:text-[#009A44] group-hover:translate-x-0.5 transition-all">
+          <ArrowRight className="w-3.5 h-3.5" />
+        </div>
+      </div>
     </div>
   );
 };
@@ -264,362 +523,341 @@ export const RaceRankingTop50: React.FC<RaceRankingTop50Props> = ({
   }, [distanceRunners, selectedAgeGroup, searchQuery]);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans selection:bg-[#9F224E] selection:text-white">
-      {/* Top Header Bar */}
-      <header className="w-full bg-white border-b border-slate-200/90 sticky top-0 z-30 shadow-2xs">
-        <div className="max-w-6xl mx-auto px-3.5 sm:px-6 py-2.5 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5">
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans selection:bg-[#009A44] selection:text-white">
+      {/* Top Header Bar with VPBank Green Style */}
+      <header className="w-full bg-[#009A44] text-white sticky top-0 z-30 shadow-md">
+        <div className="max-w-6xl mx-auto px-3.5 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={onBackToHome}
-              className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="p-1.5 sm:px-3 sm:py-1.5 rounded-full bg-white/15 hover:bg-white/25 text-white font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer border border-white/20"
               title="Quay lại danh sách giải đấu"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Chọn giải khác</span>
             </button>
 
-            <div className="flex items-center gap-2">
-              <span className="text-xs sm:text-sm font-bold text-slate-900 line-clamp-1">
-                {activeRace.name}
-              </span>
-              {activeRace.code && (
-                <span className="px-2 py-0.5 rounded-md bg-rose-50 text-[#9F224E] border border-rose-200 text-[10px] font-mono font-bold shrink-0">
-                  {activeRace.code}
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center font-black text-[#009A44] shadow-xs shrink-0 text-xs tracking-tighter">
+                VPIM
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs sm:text-sm font-extrabold uppercase tracking-wide text-white line-clamp-1">
+                  VPBank Hanoi International Marathon
                 </span>
-              )}
+                <span className="text-[10px] text-white/80 font-medium hidden sm:inline">
+                  Hanoi 2026 • Cổng tra cứu kết quả & Chứng nhận điện tử
+                </span>
+              </div>
             </div>
           </div>
 
           {/* Navigation Action: View Certificate / Search Result Page */}
           <div className="flex items-center gap-2">
+            <span className="px-2.5 py-1 rounded-full bg-white/20 text-white border border-white/30 text-[11px] font-mono font-bold shrink-0">
+              {activeRace.code || 'VPIM26'}
+            </span>
+
             <button
               type="button"
               onClick={() => onNavigateToResult()}
-              className="px-3 py-1.5 rounded-xl bg-[#0F2847] hover:bg-[#1E3A5F] text-white font-semibold text-xs flex items-center gap-1.5 shadow-xs cursor-pointer transition-all active:scale-95"
+              className="px-4 py-1.5 rounded-full bg-white hover:bg-emerald-50 text-[#009A44] font-bold text-xs flex items-center gap-1.5 shadow-sm cursor-pointer transition-all active:scale-95"
             >
-              <FileCheck className="w-3.5 h-3.5 text-[#FFD100]" />
-              <span>Tra cứu cá nhân</span>
-              <ArrowRight className="w-3 h-3 text-slate-300" />
+              <FileCheck className="w-3.5 h-3.5 text-[#009A44]" />
+              <span className="hidden sm:inline">Tra cứu cá nhân</span>
+              <span className="sm:hidden">Tra cứu</span>
+              <ArrowRight className="w-3 h-3 text-[#009A44]" />
             </button>
           </div>
         </div>
       </header>
 
+      {/* VPBank Marathon Intro Ribbon (as in Image 1) */}
+      <div className="w-full bg-gradient-to-r from-[#009A44] via-[#00A850] to-[#009A44] text-white py-2.5 px-4 shadow-inner text-center border-t border-white/15">
+        <p className="max-w-4xl mx-auto text-xs sm:text-sm leading-relaxed text-white font-medium">
+          <strong>VPBank Hanoi International Marathon</strong> là sự kiện thể thao quốc tế thường niên chính thức của Thủ đô diễn ra vào ngày <strong>18/10/2026</strong> với bốn cự ly: <strong>42km – 21km – 10km – 5km</strong>.
+        </p>
+      </div>
+
       {/* Main Ranking Content Area */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-3 sm:px-6 py-6 sm:py-8 space-y-6">
-        {/* Title: BẢNG XẾP HẠNG TOP 50 (Exactly like image.png) */}
-        <div className="text-center space-y-1">
-          <h1 className="text-xl sm:text-2xl font-black text-slate-900 uppercase tracking-wide">
-            BẢNG XẾP HẠNG TOP 50
-          </h1>
-          <p className="text-xs text-slate-500">
-            {activeRace.name} • Cập nhật thành tích thi đấu theo Chip Time
-          </p>
-        </div>
-
-        {/* Distance Selector Boxes: 42km, 21km, 10km, 5km (Matching image.png) */}
-        <div className="flex items-center justify-center gap-3 sm:gap-4 flex-wrap">
-          {(['42K', '21K', '10K', '5K'] as DistanceCategory[]).map((dist) => {
-            const isSelected = selectedDistance === dist;
-            const distNumber = dist.replace('K', '');
-
-            return (
-              <button
-                key={dist}
-                type="button"
-                onClick={() => setSelectedDistance(dist)}
-                className={`relative w-18 h-18 sm:w-22 sm:h-22 rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer shadow-xs ${
-                  isSelected
-                    ? 'bg-white border-2 border-[#9F224E] shadow-md ring-2 ring-[#9F224E]/20 scale-105'
-                    : 'bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50/80 opacity-70 hover:opacity-100'
-                }`}
-                title={`Cự ly ${dist}`}
-              >
-                <div className="flex items-baseline justify-center">
-                  <span
-                    className={`font-black tracking-tighter text-2xl sm:text-3xl italic ${
-                      isSelected ? 'text-[#9F224E]' : 'text-slate-400'
-                    }`}
-                    style={{ fontFamily: "'Neue Plak Bold', 'Montserrat', sans-serif" }}
-                  >
-                    {distNumber}
-                  </span>
-                  <span
-                    className={`text-[10px] sm:text-xs font-bold ml-0.5 ${
-                      isSelected ? 'text-[#9F224E]' : 'text-slate-400'
-                    }`}
-                  >
-                    km
-                  </span>
-                </div>
-                <div
-                  className={`w-6 h-0.5 mt-1 rounded-full ${
-                    isSelected ? 'bg-[#9F224E]' : 'bg-transparent'
-                  }`}
-                />
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Filter Controls: Age Group Selector & Live Search Input */}
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-3.5 sm:p-4 shadow-xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          {/* Age Group Selector */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-thin">
-            <span className="text-xs font-semibold text-slate-500 shrink-0 flex items-center gap-1">
-              <Filter className="w-3.5 h-3.5 text-slate-400" />
-              <span>Lứa tuổi:</span>
-            </span>
-
-            <button
-              type="button"
-              onClick={() => setSelectedAgeGroup('all')}
-              className={`px-3 py-1 rounded-xl text-xs font-semibold transition-all shrink-0 cursor-pointer ${
-                selectedAgeGroup === 'all'
-                  ? 'bg-[#0F2847] text-white shadow-2xs'
-                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-              }`}
-            >
-              Tất cả lứa tuổi
-            </button>
-
-            {availableAgeGroups.map((ag) => (
-              <button
-                key={ag}
-                type="button"
-                onClick={() => setSelectedAgeGroup(ag)}
-                className={`px-3 py-1 rounded-xl text-xs font-semibold transition-all shrink-0 cursor-pointer ${
-                  selectedAgeGroup === ag
-                    ? 'bg-[#0F2847] text-white shadow-2xs'
-                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                }`}
-              >
-                {ag}
-              </button>
-            ))}
+      <main className="flex-1 max-w-6xl w-full mx-auto px-3 sm:px-6 py-6 sm:py-8 space-y-8">
+        {/* ========================================================= */}
+        {/* 1. BOX TRA CỨU KẾT QUẢ & CHỨNG NHẬN                       */}
+        {/* ========================================================= */}
+        <section
+          className="w-full bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-7 shadow-xs space-y-4"
+          id="race-lookup-box"
+        >
+          {/* Title & Lead đồng nhất style với Bảng xếp hạng */}
+          <div className="text-center space-y-1">
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 uppercase tracking-wide">
+              TRA CỨU KẾT QUẢ & CHỨNG NHẬN
+            </h2>
+            <p className="text-xs text-slate-500">
+              {activeRace.name} • Nhập số BIB hoặc Họ tên vận động viên để tra cứu thành tích và tải chứng nhận điện tử
+            </p>
           </div>
 
-          {/* Search Runner by BIB or Name */}
-          <div className="relative sm:w-64 shrink-0">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Tìm theo BIB hoặc Họ tên..."
-              className="w-full pl-8 pr-3 py-1.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-[#9F224E] rounded-xl text-xs text-slate-800 placeholder-slate-400 outline-none transition-all"
+          <div className="max-w-2xl mx-auto w-full">
+            <SearchRunner
+              runners={runners}
+              selectedRunner={null}
+              isLoading={isLoadingRunners}
+              demoRunners={activeRace.demoRunners}
+              demoPhotos={activeRace.demoPhotos}
+              showDemoChips={false}
+              onSelectRunner={(runner) => {
+                onSelectRunner(runner);
+                onNavigateToResult(runner.bib, runner);
+              }}
             />
-            {searchQuery && (
+          </div>
+        </section>
+
+        {/* ========================================================= */}
+        {/* 2. BOX BẢNG XẾP HẠNG TOP 50                               */}
+        {/* ========================================================= */}
+        <section
+          className="w-full bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-7 shadow-xs space-y-6"
+          id="race-ranking-box"
+        >
+          {/* Title & Lead đồng nhất style với Box Tra cứu */}
+          <div className="text-center space-y-1">
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 uppercase tracking-wide">
+              BẢNG XẾP HẠNG TOP 50
+            </h2>
+            <p className="text-xs text-slate-500">
+              {activeRace.name} • Cập nhật thành tích thi đấu theo Chip Time
+            </p>
+          </div>
+
+          {/* Distance Selector Boxes with VPBank authentic colors (42K Cyan, 21K Green, 10K Amber, 5K Lime) */}
+          <div className="flex items-center justify-center gap-2.5 sm:gap-4 flex-wrap">
+            {(['42K', '21K', '10K', '5K'] as DistanceCategory[]).map((dist) => {
+              const isSelected = selectedDistance === dist;
+              const info = VPBANK_DISTANCES[dist];
+
+              return (
+                <button
+                  key={dist}
+                  type="button"
+                  onClick={() => setSelectedDistance(dist)}
+                  className={`relative px-4 py-2.5 sm:px-6 sm:py-3.5 rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer shadow-xs min-w-[85px] sm:min-w-[125px] ${
+                    isSelected
+                      ? `bg-white border-2 ${info.borderActive} shadow-md ring-4 ${info.ringActive} scale-105`
+                      : 'bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50/80 opacity-75 hover:opacity-100'
+                  }`}
+                  title={`Cự ly ${dist} - ${info.label}`}
+                >
+                  <div className="flex items-baseline justify-center">
+                    <span
+                      className={`font-black tracking-tighter text-2xl sm:text-3xl italic font-stat-value ${
+                        isSelected ? info.textActive : 'text-slate-400'
+                      }`}
+                    >
+                      {info.num}
+                    </span>
+                    <span
+                      className={`text-[10px] sm:text-xs font-bold ml-0.5 ${
+                        isSelected ? info.textActive : 'text-slate-400'
+                      }`}
+                    >
+                      km
+                    </span>
+                  </div>
+                  <span
+                    className={`text-[9px] sm:text-[10px] font-extrabold tracking-tight mt-0.5 uppercase ${
+                      isSelected ? info.textActive : 'text-slate-400'
+                    }`}
+                  >
+                    {info.label}
+                  </span>
+                  <div
+                    className="w-7 sm:w-9 h-1 mt-1.5 rounded-full transition-all"
+                    style={{ backgroundColor: isSelected ? info.color : 'transparent' }}
+                  />
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Filter Controls: Age Group Selector & Live Search Input */}
+          <div className="bg-slate-50/80 border border-slate-200/90 rounded-2xl p-3.5 sm:p-4 shadow-xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            {/* Age Group Selector */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-thin">
+              <span className="text-xs font-semibold text-slate-500 shrink-0 flex items-center gap-1">
+                <Filter className="w-3.5 h-3.5 text-slate-400" />
+                <span>Lứa tuổi:</span>
+              </span>
+
               <button
                 type="button"
-                onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
+                onClick={() => setSelectedAgeGroup('all')}
+                className={`px-3 py-1 rounded-xl text-xs font-semibold transition-all shrink-0 cursor-pointer ${
+                  selectedAgeGroup === 'all'
+                    ? 'bg-[#009A44] text-white shadow-2xs font-bold'
+                    : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
+                }`}
               >
-                ✕
+                Tất cả lứa tuổi
               </button>
-            )}
-          </div>
-        </div>
 
-        {/* Main Ranking Grid: 2 Columns (♂ NAM & ♀ NỮ) exactly like image.png */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
-          {/* ================= COLUMN 1: ♂ NAM ================= */}
-          <div className="bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-xs flex flex-col">
-            {/* Header: ♂ NAM */}
-            <div className="px-4 py-3 bg-[#F4F4F5] border-b border-slate-200 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-sky-100 text-sky-700 font-bold text-sm flex items-center justify-center">
-                  ♂
-                </span>
-                <h3 className="font-extrabold text-sm sm:text-base text-slate-900 tracking-wide">
-                  NAM
-                </h3>
-                <span className="text-[11px] text-slate-500 font-normal">
-                  ({topMale.length} VĐV)
-                </span>
-              </div>
-              <span className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider pr-5">
-                Chip time
-              </span>
+              {availableAgeGroups.map((ag) => (
+                <button
+                  key={ag}
+                  type="button"
+                  onClick={() => setSelectedAgeGroup(ag)}
+                  className={`px-3 py-1 rounded-xl text-xs font-semibold transition-all shrink-0 cursor-pointer ${
+                    selectedAgeGroup === ag
+                      ? 'bg-[#009A44] text-white shadow-2xs font-bold'
+                      : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
+                  }`}
+                >
+                  {ag}
+                </button>
+              ))}
             </div>
 
-            {/* Rows List */}
-            <div className="divide-y divide-slate-100 flex-1">
-              {topMale.length === 0 ? (
-                <div className="p-8 text-center text-slate-400 text-xs">
-                  {isLoadingRunners ? 'Đang tải danh sách...' : 'Không tìm thấy vận động viên phù hợp.'}
-                </div>
-              ) : (
-                topMale.map((runner, index) => {
-                  const rankNumber = index + 1;
-                  const isTop3 = rankNumber <= 3;
-                  const demoPhoto = getDemoPhoto(runner.bib) || getDemoPhoto(runner.name);
-                  const displayPhoto = runner.photoUrl || demoPhoto;
-                  const initialLetter = (runner.name || 'V').trim().charAt(0).toUpperCase();
-
-                  return (
-                    <div
-                      key={`${runner.bib}-${index}`}
-                      onClick={() => onSelectRunner(runner)}
-                      className="group px-3 sm:px-4 py-3 hover:bg-slate-50 flex items-center justify-between gap-3 transition-colors cursor-pointer"
-                      title={`Xem chi tiết & chứng nhận của ${runner.name} (BIB: ${runner.bib})`}
-                    >
-                      {/* Left side: Rank + Avatar + Name/BIB */}
-                      <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-                        {/* Rank Medal (1, 2, 3) or Shield Badge (4..50) */}
-                        {isTop3 ? (
-                          <LaurelWreathMedal rank={rankNumber as 1 | 2 | 3} />
-                        ) : (
-                          <RankBadge rank={rankNumber} />
-                        )}
-
-                        {/* Avatar */}
-                        {displayPhoto ? (
-                          <img
-                            src={displayPhoto}
-                            alt={runner.name}
-                            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover border border-slate-200 shrink-0"
-                          />
-                        ) : (
-                          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0 border border-slate-200">
-                            {initialLetter}
-                          </div>
-                        )}
-
-                        {/* Name and BIB */}
-                        <div className="min-w-0">
-                          <h4 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-[#9F224E] transition-colors truncate">
-                            {runner.name}
-                          </h4>
-                          <div className="text-[11px] text-slate-500 flex items-center gap-1.5 mt-0.5">
-                            <span className="font-mono">BIB: {runner.bib}</span>
-                            {runner.ag && runner.ag !== '-' && (
-                              <>
-                                <span>•</span>
-                                <span className="text-[10px] px-1 py-0.2 bg-slate-100 rounded text-slate-600">
-                                  {runner.ag}
-                                </span>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Right side: Chip time + Arrow */}
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="font-bold text-xs sm:text-sm text-slate-900 font-neue-plak">
-                          {runner.chipTime || '--:--:--'}
-                        </span>
-                        <div className="w-5 h-5 rounded-full flex items-center justify-center text-slate-400 group-hover:text-[#9F224E] group-hover:translate-x-0.5 transition-all">
-                          <ArrowRight className="w-3.5 h-3.5" />
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })
+            {/* Search Runner by BIB or Name */}
+            <div className="relative sm:w-64 shrink-0">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Lọc nhanh trong bảng Top 50..."
+                className="w-full pl-8 pr-3 py-1.5 bg-white hover:bg-white focus:bg-white border border-slate-200 focus:border-[#00A850] focus:ring-2 focus:ring-[#00A850]/20 rounded-xl text-xs text-slate-800 placeholder-slate-400 outline-none transition-all"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
+                >
+                  ✕
+                </button>
               )}
             </div>
           </div>
 
-          {/* ================= COLUMN 2: ♀ NỮ ================= */}
-          <div className="bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-xs flex flex-col">
-            {/* Header: ♀ NỮ */}
-            <div className="px-4 py-3 bg-[#F4F4F5] border-b border-slate-200 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-rose-100 text-[#9F224E] font-bold text-sm flex items-center justify-center">
-                  ♀
-                </span>
-                <h3 className="font-extrabold text-sm sm:text-base text-slate-900 tracking-wide">
-                  NỮ
-                </h3>
-                <span className="text-[11px] text-slate-500 font-normal">
-                  ({topFemale.length} VĐV)
+          {/* Main Ranking Grid: 2 Columns (♂ NAM & ♀ NỮ) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
+            {/* ================= COLUMN 1: ♂ NAM ================= */}
+            <div className="bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-xs flex flex-col">
+              {/* Header: ♂ NAM */}
+              <div className="px-4 py-3 bg-emerald-50/80 border-b border-emerald-100 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-[#009A44] text-white font-bold text-sm flex items-center justify-center shadow-2xs">
+                    ♂
+                  </span>
+                  <h3 className="font-extrabold text-sm sm:text-base text-slate-900 tracking-wide">
+                    NAM
+                  </h3>
+                  <span className="text-[11px] text-slate-500 font-normal">
+                    ({topMale.length} VĐV)
+                  </span>
+                </div>
+                <span className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider pr-5">
+                  Chip time
                 </span>
               </div>
-              <span className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider pr-5">
-                Chip time
-              </span>
+
+              {/* Top 1-3 Podium Stand (Đứng bục vinh danh - Không avatar) */}
+              {topMale.length >= 3 && (
+                <Top3Podium
+                  runners={topMale.slice(0, 3)}
+                  onSelectRunner={onSelectRunner}
+                  gender="M"
+                />
+              )}
+
+              {/* Rows List */}
+              <div className="divide-y divide-slate-100 flex-1">
+                {topMale.length === 0 ? (
+                  <div className="p-8 text-center text-slate-400 text-xs">
+                    {isLoadingRunners ? 'Đang tải danh sách...' : 'Không tìm thấy vận động viên phù hợp.'}
+                  </div>
+                ) : topMale.length < 3 ? (
+                  topMale.map((runner, index) => (
+                    <RunnerRankRow
+                      key={`${runner.bib}-${index}`}
+                      runner={runner}
+                      rankNumber={index + 1}
+                      onSelectRunner={onSelectRunner}
+                    />
+                  ))
+                ) : (
+                  topMale.slice(3).map((runner, index) => (
+                    <RunnerRankRow
+                      key={`${runner.bib}-${index + 4}`}
+                      runner={runner}
+                      rankNumber={index + 4}
+                      onSelectRunner={onSelectRunner}
+                    />
+                  ))
+                )}
+              </div>
             </div>
 
-            {/* Rows List */}
-            <div className="divide-y divide-slate-100 flex-1">
-              {topFemale.length === 0 ? (
-                <div className="p-8 text-center text-slate-400 text-xs">
-                  {isLoadingRunners ? 'Đang tải danh sách...' : 'Không tìm thấy vận động viên phù hợp.'}
+            {/* ================= COLUMN 2: ♀ NỮ ================= */}
+            <div className="bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-xs flex flex-col">
+              {/* Header: ♀ NỮ */}
+              <div className="px-4 py-3 bg-rose-50/80 border-b border-rose-100 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-rose-500 text-white font-bold text-sm flex items-center justify-center shadow-2xs">
+                    ♀
+                  </span>
+                  <h3 className="font-extrabold text-sm sm:text-base text-slate-900 tracking-wide">
+                    NỮ
+                  </h3>
+                  <span className="text-[11px] text-slate-500 font-normal">
+                    ({topFemale.length} VĐV)
+                  </span>
                 </div>
-              ) : (
-                topFemale.map((runner, index) => {
-                  const rankNumber = index + 1;
-                  const isTop3 = rankNumber <= 3;
-                  const demoPhoto = getDemoPhoto(runner.bib) || getDemoPhoto(runner.name);
-                  const displayPhoto = runner.photoUrl || demoPhoto;
-                  const initialLetter = (runner.name || 'N').trim().charAt(0).toUpperCase();
+                <span className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider pr-5">
+                  Chip time
+                </span>
+              </div>
 
-                  return (
-                    <div
-                      key={`${runner.bib}-${index}`}
-                      onClick={() => onSelectRunner(runner)}
-                      className="group px-3 sm:px-4 py-3 hover:bg-slate-50 flex items-center justify-between gap-3 transition-colors cursor-pointer"
-                      title={`Xem chi tiết & chứng nhận của ${runner.name} (BIB: ${runner.bib})`}
-                    >
-                      {/* Left side: Rank + Avatar + Name/BIB */}
-                      <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-                        {/* Rank Medal (1, 2, 3) or Shield Badge (4..50) */}
-                        {isTop3 ? (
-                          <LaurelWreathMedal rank={rankNumber as 1 | 2 | 3} />
-                        ) : (
-                          <RankBadge rank={rankNumber} />
-                        )}
-
-                        {/* Avatar */}
-                        {displayPhoto ? (
-                          <img
-                            src={displayPhoto}
-                            alt={runner.name}
-                            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover border border-slate-200 shrink-0"
-                          />
-                        ) : (
-                          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0 border border-slate-200">
-                            {initialLetter}
-                          </div>
-                        )}
-
-                        {/* Name and BIB */}
-                        <div className="min-w-0">
-                          <h4 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-[#9F224E] transition-colors truncate">
-                            {runner.name}
-                          </h4>
-                          <div className="text-[11px] text-slate-500 flex items-center gap-1.5 mt-0.5">
-                            <span className="font-mono">BIB: {runner.bib}</span>
-                            {runner.ag && runner.ag !== '-' && (
-                              <>
-                                <span>•</span>
-                                <span className="text-[10px] px-1 py-0.2 bg-slate-100 rounded text-slate-600">
-                                  {runner.ag}
-                                </span>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Right side: Chip time + Arrow */}
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="font-bold text-xs sm:text-sm text-slate-900 font-neue-plak">
-                          {runner.chipTime || '--:--:--'}
-                        </span>
-                        <div className="w-5 h-5 rounded-full flex items-center justify-center text-slate-400 group-hover:text-[#9F224E] group-hover:translate-x-0.5 transition-all">
-                          <ArrowRight className="w-3.5 h-3.5" />
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })
+              {/* Top 1-3 Podium Stand (Đứng bục vinh danh - Không avatar) */}
+              {topFemale.length >= 3 && (
+                <Top3Podium
+                  runners={topFemale.slice(0, 3)}
+                  onSelectRunner={onSelectRunner}
+                  gender="F"
+                />
               )}
+
+              {/* Rows List */}
+              <div className="divide-y divide-slate-100 flex-1">
+                {topFemale.length === 0 ? (
+                  <div className="p-8 text-center text-slate-400 text-xs">
+                    {isLoadingRunners ? 'Đang tải danh sách...' : 'Không tìm thấy vận động viên phù hợp.'}
+                  </div>
+                ) : topFemale.length < 3 ? (
+                  topFemale.map((runner, index) => (
+                    <RunnerRankRow
+                      key={`${runner.bib}-${index}`}
+                      runner={runner}
+                      rankNumber={index + 1}
+                      onSelectRunner={onSelectRunner}
+                    />
+                  ))
+                ) : (
+                  topFemale.slice(3).map((runner, index) => (
+                    <RunnerRankRow
+                      key={`${runner.bib}-${index + 4}`}
+                      runner={runner}
+                      rankNumber={index + 4}
+                      onSelectRunner={onSelectRunner}
+                    />
+                  ))
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        </section>
       </main>
     </div>
   );

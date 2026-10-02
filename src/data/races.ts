@@ -115,6 +115,14 @@ function getBundledRaces(): Race[] {
       console.warn('Error reading bundled race file', path, e);
     }
   }
+  // Sort to make VPBank Hanoi International Marathon the primary active race
+  list.sort((a, b) => {
+    const aIsVp = (a.id + a.slug + a.code).toLowerCase().includes('vp');
+    const bIsVp = (b.id + b.slug + b.code).toLowerCase().includes('vp');
+    if (aIsVp && !bIsVp) return -1;
+    if (!aIsVp && bIsVp) return 1;
+    return 0;
+  });
   return list;
 }
 

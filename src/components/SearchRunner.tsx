@@ -10,6 +10,7 @@ interface SearchRunnerProps {
   isLoading?: boolean;
   demoRunners?: Runner[];
   demoPhotos?: Record<string, string>;
+  showDemoChips?: boolean;
 }
 
 export const SearchRunner: React.FC<SearchRunnerProps> = ({
@@ -19,6 +20,7 @@ export const SearchRunner: React.FC<SearchRunnerProps> = ({
   isLoading = false,
   demoRunners,
   demoPhotos,
+  showDemoChips = true,
 }) => {
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -80,6 +82,29 @@ export const SearchRunner: React.FC<SearchRunnerProps> = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      setIsOpen(false);
+      return;
+    }
+
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (suggestions && suggestions.length > 0) {
+        const target = suggestions[highlightedIndex] || suggestions[0];
+        if (target) {
+          handleSelect(target);
+        }
+      } else if (trimmed) {
+        const matched = searchPool.find(
+          (r) => r.bib.trim().toLowerCase() === trimmed || removeDiacritics(r.name).trim() === normalizedQuery
+        );
+        if (matched) {
+          handleSelect(matched);
+        }
+      }
+      return;
+    }
+
     if (!isOpen || suggestions.length === 0) return;
 
     if (e.key === 'ArrowDown') {
@@ -88,13 +113,6 @@ export const SearchRunner: React.FC<SearchRunnerProps> = ({
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       setHighlightedIndex((prev) => (prev - 1 + suggestions.length) % suggestions.length);
-    } else if (e.key === 'Enter') {
-      e.preventDefault();
-      if (suggestions[highlightedIndex]) {
-        handleSelect(suggestions[highlightedIndex]);
-      }
-    } else if (e.key === 'Escape') {
-      setIsOpen(false);
     }
   };
 
@@ -116,7 +134,7 @@ export const SearchRunner: React.FC<SearchRunnerProps> = ({
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleKeyDown}
           placeholder="Nhập số BIB hoặc Họ tên (VD: 90110 hoặc Phùng Hữu Thanh)..."
-          className="w-full pl-10 pr-10 py-3 bg-slate-50 hover:bg-white text-slate-900 placeholder-slate-400 border border-slate-200 rounded-xl shadow-xs focus:outline-none focus:bg-white focus:border-[#9F224E] focus:ring-2 focus:ring-[#9F224E]/15 text-sm font-medium transition-all"
+          className="w-full pl-10 pr-10 py-3 bg-slate-50 hover:bg-white text-slate-900 placeholder-slate-400 border border-slate-200 rounded-xl shadow-xs focus:outline-none focus:bg-white focus:border-[#00A850] focus:ring-2 focus:ring-[#00A850]/20 text-sm font-medium transition-all"
         />
 
         <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center gap-2">
@@ -163,7 +181,7 @@ export const SearchRunner: React.FC<SearchRunnerProps> = ({
                   onClick={() => handleSelect(item)}
                   onMouseEnter={() => setHighlightedIndex(index)}
                   className={`w-full text-left px-3.5 py-2.5 flex items-center justify-between transition-colors ${
-                    isHighlighted ? 'bg-rose-50/50 text-slate-900' : 'text-slate-700 hover:bg-slate-50'
+                    isHighlighted ? 'bg-emerald-50/70 text-slate-900' : 'text-slate-700 hover:bg-slate-50'
                   }`}
                 >
                   <div className="flex items-center space-x-3">
@@ -178,7 +196,7 @@ export const SearchRunner: React.FC<SearchRunnerProps> = ({
                       ) : (
                         <div
                           className={`w-7 h-7 rounded-md flex items-center justify-center font-bold text-[11px] ${
-                            item.gender === 'F' ? 'bg-rose-50 text-[#9F224E]' : 'bg-sky-50 text-sky-700'
+                            item.gender === 'F' ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-[#00A850]'
                           }`}
                         >
                           {item.gender}
@@ -188,15 +206,15 @@ export const SearchRunner: React.FC<SearchRunnerProps> = ({
                     <div>
                       <div className="font-semibold text-slate-900 text-sm flex items-center gap-1.5">
                         <span>{item.name}</span>
-                        <span className="text-xs font-neue-plak font-bold text-[#0F2847] bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
+                        <span className="text-xs font-neue-plak font-bold text-[#009A44] bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
                           #{item.bib}
                         </span>
-                        {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-[#9F224E] inline" />}
+                        {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-[#00A850] inline" />}
                       </div>
                       <div className="text-xs text-slate-500 mt-0.5 flex items-center gap-2">
-                        <span className="font-semibold text-[#0F2847]">{item.distance}</span>
+                        <span className="font-semibold text-[#009A44]">{item.distance}</span>
                         <span>•</span>
-                        <span>Chip Time: <strong className="font-neue-plak font-bold text-[#0F2847]">{item.chipTime}</strong></span>
+                        <span>Chip Time: <strong className="font-neue-plak font-bold text-slate-900">{item.chipTime}</strong></span>
                         <span>•</span>
                         <span>Hạng: <strong className="font-neue-plak font-bold text-amber-600">#{item.overallRank}</strong></span>
                       </div>
@@ -233,27 +251,29 @@ export const SearchRunner: React.FC<SearchRunnerProps> = ({
       )}
 
       {/* Quick sample chips */}
-      <div className="mt-2.5 flex items-center flex-wrap gap-1.5 text-xs" id="demo-runners-section">
-        <span className="text-slate-400 font-medium mr-1 text-[11px]">VĐV mẫu:</span>
-        {activeDemos.map((r) => {
-          const isCurrent = selectedRunner?.bib === r.bib;
-          return (
-            <button
-              key={r.bib}
-              type="button"
-              id={`demo-runner-btn-${r.bib}`}
-              onClick={() => handleSelect(r)}
-              className={`px-2.5 py-1 rounded-lg border text-xs font-medium transition-all cursor-pointer ${
-                isCurrent
-                  ? 'bg-[#0F2847] text-white border-[#0F2847] shadow-xs font-semibold'
-                  : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
-              }`}
-            >
-              {r.name} <span className="font-mono text-[11px] opacity-80">({r.bib})</span>
-            </button>
-          );
-        })}
-      </div>
+      {showDemoChips && activeDemos.length > 0 && (
+        <div className="mt-2.5 flex items-center flex-wrap gap-1.5 text-xs" id="demo-runners-section">
+          <span className="text-slate-400 font-medium mr-1 text-[11px]">VĐV mẫu:</span>
+          {activeDemos.map((r) => {
+            const isCurrent = selectedRunner?.bib === r.bib;
+            return (
+              <button
+                key={r.bib}
+                type="button"
+                id={`demo-runner-btn-${r.bib}`}
+                onClick={() => handleSelect(r)}
+                className={`px-2.5 py-1 rounded-lg border text-xs font-medium transition-all cursor-pointer ${
+                  isCurrent
+                    ? 'bg-[#009A44] text-white border-[#009A44] shadow-xs font-semibold'
+                    : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                }`}
+              >
+                {r.name} <span className="font-mono text-[11px] opacity-80">({r.bib})</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

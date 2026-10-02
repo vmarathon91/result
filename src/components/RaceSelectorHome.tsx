@@ -36,16 +36,16 @@ export const RaceSelectorHome: React.FC<RaceSelectorHomeProps> = ({
   });
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col font-sans selection:bg-[#9F224E] selection:text-white">
+    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col font-sans selection:bg-[#009A44] selection:text-white">
       {/* Top Simple Utility Bar */}
       <header className="w-full border-b border-slate-800 bg-slate-950/70 backdrop-blur-md px-4 sm:px-8 py-3.5 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-[#9F224E] flex items-center justify-center text-white shadow-md">
-            <Trophy className="w-4 h-4 text-[#FFD100]" />
+          <div className="w-8 h-8 rounded-xl bg-[#009A44] flex items-center justify-center text-white shadow-md">
+            <Trophy className="w-4 h-4 text-white" />
           </div>
           <div>
             <h1 className="text-sm font-bold text-white tracking-tight">
-              VnExpress Marathon
+              VPBank International Marathon
             </h1>
             <p className="text-[10px] text-slate-400">
               Cổng Tra Cứu & Chứng Nhận Điện Tử
@@ -59,7 +59,7 @@ export const RaceSelectorHome: React.FC<RaceSelectorHomeProps> = ({
           className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-750 text-slate-300 hover:text-white border border-slate-700 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
           title="Vào khu vực quản trị giải đấu"
         >
-          <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+          <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
           <span>Quản trị</span>
         </button>
       </header>
@@ -68,7 +68,7 @@ export const RaceSelectorHome: React.FC<RaceSelectorHomeProps> = ({
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
         {/* Hero Banner */}
         <div className="text-center max-w-2xl mx-auto space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#9F224E]/20 border border-[#9F224E]/40 text-[#FFD100] text-xs font-semibold">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#009A44]/20 border border-[#009A44]/40 text-emerald-300 text-xs font-semibold">
             <Sparkles className="w-3.5 h-3.5" />
             <span>Chọn giải chạy đã khởi tạo</span>
           </div>
@@ -90,7 +90,7 @@ export const RaceSelectorHome: React.FC<RaceSelectorHomeProps> = ({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Tìm kiếm giải chạy theo tên hoặc địa điểm..."
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-800 focus:border-[#9F224E] focus:ring-1 focus:ring-[#9F224E]/30 rounded-2xl text-xs sm:text-sm text-white placeholder-slate-500 outline-none transition-all shadow-inner"
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-800 focus:border-[#00A850] focus:ring-1 focus:ring-[#00A850]/30 rounded-2xl text-xs sm:text-sm text-white placeholder-slate-500 outline-none transition-all shadow-inner"
                 />
               </div>
             </div>

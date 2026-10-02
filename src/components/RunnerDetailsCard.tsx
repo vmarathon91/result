@@ -32,18 +32,18 @@ export const RunnerDetailsCard: React.FC<RunnerDetailsCardProps> = ({ runner }) 
               <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
                 {runner.name}
               </h3>
-              <span className="text-xs px-2 py-0.5 rounded-md bg-slate-100 text-[#0F2847] font-neue-plak font-bold border border-slate-200">
+              <span className="text-xs px-2 py-0.5 rounded-md bg-emerald-50 text-[#009A44] font-neue-plak font-bold border border-emerald-200">
                 BIB: {runner.bib}
               </span>
             </div>
             <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-2">
-              <span className="text-[#9F224E] font-bold bg-rose-50 border border-rose-200/70 px-1.5 py-0.2 rounded">
+              <span className="text-[#009A44] font-bold bg-emerald-50 border border-emerald-200/70 px-1.5 py-0.2 rounded">
                 {runner.distance}
               </span>
               <span>•</span>
               <span className="flex items-center gap-1">
                 <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                {runner.date || '13/09/2026'}
+                {runner.date || '18/10/2026'}
               </span>
             </p>
           </div>

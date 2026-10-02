@@ -889,7 +889,7 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
             id="download-cert-btn"
             onClick={handleDownload}
             disabled={isDownloading}
-            className="px-4.5 py-2.5 bg-gradient-to-r from-[#9F224E] via-[#B81B4B] to-[#9F224E] hover:from-[#881337] hover:to-[#9F224E] text-white font-bold text-xs rounded-xl shadow-md shadow-rose-950/20 flex items-center gap-2 transition-all transform active:scale-95 disabled:opacity-50 cursor-pointer"
+            className="px-4.5 py-2.5 bg-gradient-to-r from-[#009A44] via-[#00B140] to-[#009A44] hover:from-[#008239] hover:to-[#009A44] text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-950/20 flex items-center gap-2 transition-all transform active:scale-95 disabled:opacity-50 cursor-pointer"
           >
             {isDownloading ? <RefreshCw className="w-4 h-4 animate-spin text-white/80" /> : <Download className="w-4 h-4" />}
             <span>
@@ -934,7 +934,7 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
               type="button"
               id="upload-personal-photo-btn"
               onClick={() => personalFileInputRef.current?.click()}
-              className="px-3 py-1.5 bg-[#0F2847] hover:bg-[#1E3A5F] text-white font-semibold rounded-lg flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
+              className="px-3 py-1.5 bg-[#009A44] hover:bg-[#008239] text-white font-semibold rounded-lg flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
               title="Tải ảnh chạy bộ của bạn lên"
             >
               <Upload className="w-3.5 h-3.5" />
@@ -1361,14 +1361,14 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
           className={`relative ${
             showPlacementTool ? 'flex-1 w-full min-w-0' : 'w-full'
           } rounded-2xl overflow-hidden shadow-xs border bg-slate-100/70 flex flex-col items-center justify-center p-2 sm:p-4 group transition-all ${
-            isDragging ? 'border-[#9F224E] ring-2 ring-[#9F224E]/20' : 'border-slate-200/90'
+            isDragging ? 'border-[#00A850] ring-2 ring-[#00A850]/20' : 'border-slate-200/90'
           }`}
         >
           {/* Visual helper badge */}
           <div className="absolute top-3 left-3 z-10 hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/95 border border-slate-200 backdrop-blur-md text-[11px] text-slate-700 shadow-xs pointer-events-none">
             {showPlacementTool ? (
               <>
-                <Target className="w-3.5 h-3.5 text-[#9F224E] animate-pulse" />
+                <Target className="w-3.5 h-3.5 text-[#00A850] animate-pulse" />
                 <span className="font-semibold text-slate-900">Live Preview trực tiếp</span>
               </>
             ) : viewMode === 'collage' ? (
@@ -1378,7 +1378,7 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
               </>
             ) : (
               <>
-                <span className="w-2 h-2 rounded-full bg-[#9F224E]"></span>
+                <span className="w-2 h-2 rounded-full bg-[#00A850]"></span>
                 <span className="font-medium text-slate-700">Kéo thả ảnh để đổi phôi chứng nhận</span>
               </>
             )}
@@ -1462,8 +1462,8 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
             {/* Modal Body: Instructions & High-res Image Preview */}
             <div className="p-4 space-y-3 overflow-y-auto flex-1 text-xs">
               {/* Highlight Instruction Box */}
-              <div className="bg-rose-50/70 border border-rose-200/80 rounded-xl p-3 text-slate-800 space-y-1.5">
-                <div className="font-bold flex items-center gap-1.5 text-xs text-[#9F224E]">
+              <div className="bg-emerald-50/70 border border-emerald-200/80 rounded-xl p-3 text-slate-800 space-y-1.5">
+                <div className="font-bold flex items-center gap-1.5 text-xs text-[#009A44]">
                   <span>💡 Cách lưu thẳng vào Thư viện ảnh (Cuộn camera):</span>
                 </div>
                 <p className="text-[11px] text-slate-700 leading-relaxed">
@@ -1495,7 +1495,7 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
                       try {
                         await navigator.share({
                           files: [exportedImageFile],
-                          title: `Chứng nhận VnExpress Marathon - ${runner.name}`,
+                          title: `Chứng nhận VPBank Marathon - ${runner.name}`,
                         });
                       } catch (e) {
                         console.log('Share cancelled', e);
@@ -1509,7 +1509,7 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
                       document.body.removeChild(link);
                     }
                   }}
-                  className="flex-1 py-2.5 px-3 bg-[#9F224E] hover:bg-[#881337] text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                  className="flex-1 py-2.5 px-3 bg-[#009A44] hover:bg-[#008239] text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
                 >
                   <Share2 className="w-3.5 h-3.5 text-white/90" />
                   <span>Lưu vào Thư viện ảnh (Share)</span>
