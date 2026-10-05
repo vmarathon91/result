@@ -40,11 +40,15 @@ export const RunnerDetailsCard: React.FC<RunnerDetailsCardProps> = ({ runner }) 
               <span className="text-[#009A44] font-bold bg-emerald-50 border border-emerald-200/70 px-1.5 py-0.2 rounded">
                 {runner.distance}
               </span>
-              <span>•</span>
-              <span className="flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                {runner.date || '18/10/2026'}
-              </span>
+              {runner.date && (
+                <>
+                  <span>•</span>
+                  <span className="flex items-center gap-1">
+                    <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                    {runner.date}
+                  </span>
+                </>
+              )}
             </p>
           </div>
         </div>

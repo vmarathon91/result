@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Runner } from '../types';
 import { Race } from '../data/races';
+import { SearchRunner } from './SearchRunner';
 import {
   Trophy,
   ArrowRight,
@@ -427,7 +428,6 @@ function matchesDistance(runnerDist: string, category: DistanceCategory, bib: st
  * để loại bỏ hoàn toàn khỏi Bảng Xếp Hạng (BXH) theo yêu cầu.
  */
 export function isPacerOrNoAge(runner: Runner): boolean {
-  if (!runner) return true;
   const ag = (runner.ag || '').toLowerCase().trim();
   const name = (runner.name || '').toLowerCase().trim();
   const bib = String(runner.bib || '').toLowerCase().trim();
@@ -437,41 +437,22 @@ export function isPacerOrNoAge(runner: Runner): boolean {
     ag === 'pacer' ||
     ag.includes('pacer') ||
     name.includes('pacer') ||
-    bib.includes('pacer') ||
-    name.includes('dẫn tốc') ||
-    name.includes('dan toc')
+    bib.includes('pacer')
   ) {
     return true;
   }
 
-  // 2. Kiểm tra No age / Không có nhóm tuổi / Rỗng
-  const normAg = ag.replace(/[^a-z0-9]/g, '');
+  // 2. Kiểm tra No age / Không có nhóm tuổi
   if (
     !ag ||
     ag === '-' ||
-    ag === '--' ||
     ag === 'null' ||
-    ag === 'undefined' ||
     ag === 'none' ||
-    ag === 'n/a' ||
-    ag === 'na' ||
-    ag === '0' ||
     ag === 'no age' ||
     ag === 'noage' ||
     ag === 'no_age' ||
-    ag.includes('no age') ||
-    normAg === 'noage' ||
-    normAg === 'none' ||
-    normAg === 'na' ||
-    normAg === ''
+    ag.includes('no age')
   ) {
-    return true;
-  }
-
-  // Bắt buộc phải có chữ số trong nhóm tuổi (ví dụ: 31-39, 40-49, 60+, 01-30)
-  // Nếu chỉ có "M" hoặc "F" hoặc "Nam" hoặc "Nữ" mà không có số tuổi -> coi là không có tuổi (No age)
-  const strippedAge = ag.replace(/^[mf]/i, '').trim();
-  if (!strippedAge || strippedAge === '-' || !/\d/.test(strippedAge)) {
     return true;
   }
 
@@ -604,11 +585,14 @@ export const RaceRankingTop50: React.FC<RaceRankingTop50Props> = ({
   }, [distanceRunners, selectedAgeGroup, searchQuery]);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans selection:bg-[#009A44] selection:text-white">
-      {/* Top Header Bar with VPBank Green Style */}
-      <header className="w-full bg-[#009A44] text-white sticky top-0 z-30 shadow-md">
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans">
+      {/* Top Header Bar dynamically styled with active race branding */}
+      <header
+        className="w-full text-white sticky top-0 z-30 shadow-md transition-colors"
+        style={{ backgroundColor: activeRace.accentColor || '#009A44' }}
+      >
         <div className="max-w-6xl mx-auto px-3.5 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             <button
               type="button"
               onClick={onBackToHome}
@@ -624,56 +608,96 @@ export const RaceRankingTop50: React.FC<RaceRankingTop50Props> = ({
                 <img
                   src={activeRace.defaultLogoUrl}
                   alt={activeRace.name}
-                  className="w-8 h-8 rounded-lg object-contain bg-white p-0.5 shadow-xs shrink-0"
+                  className="h-8 w-auto max-w-[85px] object-contain shrink-0 bg-white/10 rounded px-1 hidden xs:block"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLElement).style.display = 'none';
+                  }}
                 />
-              ) : (
-                <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center font-black text-[#009A44] shadow-xs shrink-0 text-xs tracking-tighter uppercase font-mono">
-                  {activeRace.code ? activeRace.code.slice(0, 4) : 'VM'}
-                </div>
-              )}
+              ) : null}
+              <div
+                className="w-8 h-8 rounded-lg bg-white flex items-center justify-center font-black shadow-xs shrink-0 text-[11px] tracking-tighter"
+                style={{ color: activeRace.accentColor || '#009A44' }}
+              >
+                {activeRace.code || activeRace.shortName?.slice(0, 4).toUpperCase() || 'RACE'}
+              </div>
               <div className="flex flex-col min-w-0">
-                <span className="text-xs sm:text-sm font-extrabold uppercase tracking-wide text-white truncate">
+                <span
+                  className="text-xs sm:text-sm font-extrabold uppercase tracking-wide text-white truncate max-w-[200px] xs:max-w-[300px] sm:max-w-[450px]"
+                  title={activeRace.name}
+                >
                   {activeRace.name}
                 </span>
-                <span className="text-[10px] text-white/80 font-medium hidden sm:inline truncate">
-                  {activeRace.locationFull || activeRace.city || 'Việt Nam'}{activeRace.date ? ` • ${activeRace.date}` : ''} • Cổng tra cứu kết quả & Chứng nhận điện tử
+                <span className="text-[10px] text-white/85 font-medium hidden sm:inline truncate">
+                  {(activeRace.city || activeRace.locationFull || 'Việt Nam')} {activeRace.date ? `• ${activeRace.date}` : ''} • Cổng tra cứu kết quả & Chứng nhận điện tử
                 </span>
               </div>
             </div>
           </div>
 
           {/* Navigation Action: View Certificate / Search Result Page */}
-          <div className="flex items-center gap-2">
-            {activeRace.code && (
-              <span className="px-2.5 py-1 rounded-full bg-white/20 text-white border border-white/30 text-[11px] font-mono font-bold shrink-0">
-                {activeRace.code}
-              </span>
-            )}
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="px-2.5 py-1 rounded-full bg-white/20 text-white border border-white/30 text-[11px] font-mono font-bold shrink-0">
+              {activeRace.code || 'RACE'}
+            </span>
 
             <button
               type="button"
               onClick={() => onNavigateToResult()}
-              className="px-4 py-1.5 rounded-full bg-white hover:bg-emerald-50 text-[#009A44] font-bold text-xs flex items-center gap-1.5 shadow-sm cursor-pointer transition-all active:scale-95 shrink-0 whitespace-nowrap"
+              className="px-4 py-1.5 rounded-full bg-white hover:bg-slate-50 font-bold text-xs flex items-center gap-1.5 shadow-sm cursor-pointer transition-all active:scale-95 shrink-0 whitespace-nowrap"
+              style={{ color: activeRace.accentColor || '#009A44' }}
             >
-              <FileCheck className="w-3.5 h-3.5 text-[#009A44] shrink-0" />
+              <FileCheck className="w-3.5 h-3.5 shrink-0" style={{ color: activeRace.accentColor || '#009A44' }} />
               <span className="hidden sm:inline whitespace-nowrap">Tra cứu cá nhân</span>
               <span className="sm:hidden whitespace-nowrap">Tra cứu</span>
-              <ArrowRight className="w-3 h-3 text-[#009A44] shrink-0" />
+              <ArrowRight className="w-3 h-3 shrink-0" style={{ color: activeRace.accentColor || '#009A44' }} />
             </button>
           </div>
         </div>
       </header>
 
       {/* Main Ranking Content Area */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-3 sm:px-6 py-6 sm:py-8 space-y-6">
+      <main className="flex-1 max-w-6xl w-full mx-auto px-3 sm:px-6 py-6 sm:py-8 space-y-8">
         {/* ========================================================= */}
-        {/* BẢNG XẾP HẠNG TOP 50                                      */}
+        {/* 1. BOX TRA CỨU KẾT QUẢ & CHỨNG NHẬN                       */}
+        {/* ========================================================= */}
+        <section
+          className="w-full bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-7 shadow-xs space-y-4"
+          id="race-lookup-box"
+        >
+          {/* Title & Lead đồng nhất style với Bảng xếp hạng */}
+          <div className="text-center space-y-1">
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 uppercase tracking-wide">
+              TRA CỨU KẾT QUẢ & CHỨNG NHẬN
+            </h2>
+            <p className="text-xs text-slate-500">
+              {activeRace.name} • Nhập số BIB hoặc Họ tên vận động viên để tra cứu thành tích và tải chứng nhận điện tử
+            </p>
+          </div>
+
+          <div className="max-w-2xl mx-auto w-full">
+            <SearchRunner
+              runners={runners}
+              selectedRunner={null}
+              isLoading={isLoadingRunners}
+              demoRunners={activeRace.demoRunners}
+              demoPhotos={activeRace.demoPhotos}
+              showDemoChips={false}
+              onSelectRunner={(runner) => {
+                onSelectRunner(runner);
+                onNavigateToResult(runner.bib, runner);
+              }}
+            />
+          </div>
+        </section>
+
+        {/* ========================================================= */}
+        {/* 2. BOX BẢNG XẾP HẠNG TOP 50                               */}
         {/* ========================================================= */}
         <section
           className="w-full bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-7 shadow-xs space-y-6"
           id="race-ranking-box"
         >
-          {/* Title & Lead */}
+          {/* Title & Lead đồng nhất style với Box Tra cứu */}
           <div className="text-center space-y-1">
             <h2 className="text-xl sm:text-2xl font-black text-slate-900 uppercase tracking-wide">
               BẢNG XẾP HẠNG TOP 50

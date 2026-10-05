@@ -651,10 +651,13 @@ export function CertificateLookup({
 
   // Render Certificate Lookup Page
   return (
-    <div className={`min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans selection:bg-[#009A44] selection:text-white ${className}`}>
-      {/* Top Bar with VPBank Green Style */}
+    <div className={`min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans ${className}`}>
+      {/* Top Bar with dynamic race branding */}
       {!hideHeader && (
-        <header className="w-full bg-[#009A44] text-white sticky top-0 z-20 shadow-md">
+        <header
+          className="w-full text-white sticky top-0 z-20 shadow-md transition-colors"
+          style={{ backgroundColor: activeRace.accentColor || '#009A44' }}
+        >
           <div className="max-w-5xl mx-auto px-3.5 sm:px-6 py-2.5 flex items-center justify-between gap-3">
             {shouldShowBack ? (
               <button
@@ -675,7 +678,8 @@ export function CertificateLookup({
                 <button
                   type="button"
                   onClick={onNavigateToRanking}
-                  className="px-3.5 py-1.5 rounded-full bg-white hover:bg-emerald-50 text-[#009A44] font-bold text-xs flex items-center gap-1.5 shadow-sm transition-colors cursor-pointer shrink-0 whitespace-nowrap"
+                  className="px-3.5 py-1.5 rounded-full bg-white hover:bg-slate-50 font-bold text-xs flex items-center gap-1.5 shadow-sm transition-colors cursor-pointer shrink-0 whitespace-nowrap"
+                  style={{ color: activeRace.accentColor || '#009A44' }}
                   title="Chuyển sang Bảng xếp hạng Top 50"
                 >
                   <Trophy className="w-3.5 h-3.5 text-amber-500 shrink-0" />
@@ -684,7 +688,7 @@ export function CertificateLookup({
                 </button>
               )}
 
-              <span className="text-xs font-bold text-white line-clamp-1">
+              <span className="text-xs font-bold text-white line-clamp-1" title={activeRace.name}>
                 {activeRace.name}
               </span>
               {activeRace.code && (
